@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GaonKaam - MGNREGA & Attendance System Guide</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 14mm 16mm 14mm 16mm;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background-color: #ffffff;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .header {
+      border-bottom: 2px solid #16a34a;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #15803d;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-subtitle {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 22px 0 10px 0;
+      border-left: 4px solid #16a34a;
+      padding-left: 10px;
+    }
+
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 18px 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin: 12px 0 6px 0;
+    }
+
+    p {
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 4px;
+      color: #334155;
+    }
+
+    .overview-banner {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+    }
+
+    .overview-banner p {
+      margin-bottom: 0;
+      font-size: 13px;
+      color: #166534;
+      font-weight: 500;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 12px 0 16px 0;
+    }
+
+    .kpi-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .kpi-num {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .kpi-green .kpi-num { color: #16a34a; }
+    .kpi-red .kpi-num { color: #dc2626; }
+    .kpi-blue .kpi-num { color: #2563eb; }
+
+    .workflow-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 14px 0 16px 0;
+    }
+
+    .workflow-step {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    .workflow-step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: #16a34a;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .workflow-step-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 18px 0;
+      font-size: 12px;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    td {
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+    }
+
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .code-box {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      overflow-x: auto;
+      margin: 10px 0 14px 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .tag-green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .tag-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .tag-blue { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .tag-amber { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    .day-pill-demo {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .day-pill {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 48px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+    }
+
+    .day-pill.present {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #15803d;
+    }
+
+    .day-pill.absent {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+
+    .day-pill-date { font-size: 9px; opacity: 0.8; }
+    .day-pill-status { font-size: 14px; font-weight: 700; }
+
+    .formula-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 10px 14px;
+      margin: 10px 0 14px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+      color: #1e3a8a;
+    }
+
+    .avoid-break {
+      page-break-inside: avoid;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer {
+      margin-top: 24px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+      font-size: 10px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-title">🌾 GaonKaam (गांवकाम)</div>
+      <div class="brand-subtitle">MGNREGA Public Works & Dual-Tier Attendance System Architecture</div>
+    </div>
+    <div class="doc-meta">
+      <div><strong>Platform:</strong> GaonKaam Web Engine</div>
+      <div><strong>Version:</strong> v2.4 (Production Revert)</div>
+      <div><strong>Date:</strong> November 2026</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW BANNER -->
+  <div class="overview-banner">
+    <p><strong>System Overview:</strong> GaonKaam implements a robust, two-tier attendance and labor tracking infrastructure designed specifically for rural governance and village micro-economies. It seamlessly bridges public panchayat schemes with private domestic & agricultural hiring.</p>
+  </div>
+
+  <!-- TWO TIERS SUMMARY -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-green">
+      <div class="kpi-num">Tier 1</div>
+      <div class="kpi-label">MGNREGA Govt Portal</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-num">Tier 2</div>
+      <div class="kpi-label">Private Work Attendance</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">₹260/day</div>
+      <div class="kpi-label">Fixed Govt Sanctioned Wage</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">100% Direct</div>
+      <div class="kpi-label">WhatsApp Attendance Slips</div>
+    </div>
+  </div>
+
+  <!-- PART 1: MGNREGA -->
+  <div class="avoid-break">
+    <h1>Part 1: MGNREGA (मनरेगा) Government Work & Digital Attendance Portal</h1>
+    
+    <h2>1. Purpose & Administrative Scope</h2>
+    <p>The MGNREGA portal within GaonKaam provides Gram Rozgar Sevaks, Panchayat Secretaries, and village job-card holders with an automated muster roll management dashboard. It complies with the Ministry of Rural Development's <strong>National Mobile Monitoring System (NMMS)</strong> standards to ensure transparency, prevent ghost worker fraud, and accelerate Direct Benefit Transfer (DBT) wage disbursements.</p>
+    <ul>
+      <li><strong>Village-Scoped Filtering:</strong> Automatically isolates government projects and registered job-card laborers according to the active village selected (e.g., <em>Sundarpur, Block Robertsganj</em>).</li>
+      <li><strong>Work Types Supported:</strong> Amrit Sarovar Pond excavation, rural link roads, plantation and horticulture, flood-control embankment construction, and canal de-silting.</li>
+      <li><strong>Live Muster Roll Calculations:</strong> Instant tallying of present workers, absent workers, and total daily wage liability based on the official sanctioned rate (<strong>₹260 / day</strong>).</li>
+    </ul>
+  </div>
+
+  <div class="avoid-break">
+    <h2>2. Data Model Architecture (<code>data.js</code> &rarr; <code>GAON_DATA.mnregaProjects</code>)</h2>
+    <p>Each panchayat project is represented with full budgetary and supervisory metadata:</p>
+    <div class="code-box">
+{
+  id: "MNR-SUNDAR-01",
+  village: "Sundarpur",
+  block: "Robertsganj",
+  title: "Amrit Sarovar Pond De-Silting & Beautification",
+  titleHi: "अमृत सरोवर तालाब गहरीकरण एवं सुंदरीकरण",
+  projectCode: "UP-SON-2026-0891",
+  sanctionedWage: 260, // ₹ / day official government fixed wage
+  totalDays: 60,
+  daysCompleted: 24,
+  totalBudget: 468000,
+  workersNeeded: 20,
+  status: "active",
+  gramRozgarSevak: "Dinesh Kumar (Rozgar Sevak)",
+  contactPhone: "+91 94567 11223",
+  workSiteLandmark: "Sundarpur Purana Pokhra (East Field)"
+}
+    </div>
+  </div>
+
+  <div class="avoid-break">
+    <h2>3. Real-Time Muster Roll Dashboard & Controls</h2>
+    <p>When the MGNREGA screen is rendered by <code>app.js &rarr; renderAttendanceViewHTML()</code>, it computes four vital operational indicators:</p>
+    
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-num">12</div>
+        <div class="kpi-label">Total Registered Workers</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-num">10</div>
+        <div class="kpi-label">Present Today (उपस्थित)</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-num">2</div>
+        <div class="kpi-label">Absent Today (अनुपस्थित)</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-num">₹2,600</div>
+        <div class="kpi-label">Daily Wage Pool Due</div>
+      </div>
+    </div>
+
+    <h3>Muster Roll Action Toolbar:</h3>
+    <ul>
+      <li><strong>Mark All Present:</strong> Sets every job-card laborer to verified present with one click for high-efficiency morning call-outs.</li>
+      <li><strong>Reset Attendance:</strong> Resets all statuses to pending verification if corrections are required.</li>
+      <li><strong>Submit Digital Muster Roll (NMMS Upload):</strong> Locks today's attendance record, generates an official cryptographic muster receipt, and submits the batch to the district rural portal.</li>
+    </ul>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- WORKER VERIFICATION TABLE -->
+  <div class="avoid-break">
+    <h2>4. Job-Card Holder Roster & Attendance Verification Matrix</h2>
+    <p>Each registered laborer record in <code>GAON_DATA.mnregaWorkers</code> contains full identity and payment verification badges:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Worker Name & Gender</th>
+          <th>MGNREGA Job Card Number</th>
+          <th>Compliance Status</th>
+          <th>Shift Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ramlal Kol</strong> (M, 42)</td>
+          <td><code>UP-05-231-014/001</code></td>
+          <td><span class="tag tag-green">Aadhaar Linked</span> <span class="tag tag-blue">DBT Active</span></td>
+          <td><span class="tag tag-green">✓ उपस्थित / Present</span></td>
+          <td><button style="padding:2px 8px; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; background:#fff;">Toggle Status</button></td>
+        </tr>
+        <tr>
+          <td><strong>Phoolmati Devi</strong> (F, 38)</td>
+          <td><code>UP-05-231-014/002</code></td>
+          <td><span class="tag tag-green">Aadhaar Linked</span> <span class="tag tag-blue">DBT Active</span></td>
+          <td><span class="tag tag-green">✓ उपस्थित / Present</span></td>
+          <td><button style="padding:2px 8px; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; background:#fff;">Toggle Status</button></td>
+        </tr>
+        <tr>
+          <td><strong>Shivcharan Patel</strong> (M, 49)</td>
+          <td><code>UP-05-231-014/003</code></td>
+          <td><span class="tag tag-green">Aadhaar Linked</span> <span class="tag tag-blue">DBT Active</span></td>
+          <td><span class="tag tag-red">✕ अनुपस्थित / Absent</span></td>
+          <td><button style="padding:2px 8px; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; background:#fff;">Toggle Status</button></td>
+        </tr>
+        <tr>
+          <td><strong>Kallu Ram</strong> (M, 35)</td>
+          <td><code>UP-05-231-014/004</code></td>
+          <td><span class="tag tag-green">Aadhaar Linked</span> <span class="tag tag-amber">Bank Verify Pending</span></td>
+          <td><span class="tag tag-green">✓ उपस्थित / Present</span></td>
+          <td><button style="padding:2px 8px; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; background:#fff;">Toggle Status</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PART 2: PRIVATE WORK OWNER ATTENDANCE -->
+  <div class="avoid-break">
+    <h1>Part 2: Private Work Owner & Hired Worker Attendance Register</h1>
+    
+    <h2>1. End-to-End Workflow Architecture</h2>
+    <p>In village economies, private hiring of local artisans (masons, carpenters, tractor drivers, farm hands) requires mutual trust and transparent record-keeping. GaonKaam provides a purpose-built private muster roll:</p>
+
+    <div class="workflow-container">
+      <div class="workflow-step">
+        <div class="workflow-step-num">Step 1</div>
+        <div class="workflow-step-title">Worker Discovery</div>
+        <p style="font-size:10px; color:#64748b; margin-top:4px;">Filter by village & trade</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-step-num">Step 2</div>
+        <div class="workflow-step-title">Hire Confirmation</div>
+        <p style="font-size:10px; color:#64748b; margin-top:4px;">Define title & daily wage</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-step-num">Step 3</div>
+        <div class="workflow-step-title">Hired Register</div>
+        <p style="font-size:10px; color:#64748b; margin-top:4px;">Worker added to employer profile</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-step-num">Step 4</div>
+        <div class="workflow-step-title">Day-Pill Tracking</div>
+        <p style="font-size:10px; color:#64748b; margin-top:4px;">Interactive daily [P] / [A] matrix</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-step-num">Step 5</div>
+        <div class="workflow-step-title">Slip Settlement</div>
+        <p style="font-size:10px; color:#64748b; margin-top:4px;">1-click WhatsApp audit slip</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="avoid-break">
+    <h2>2. Dynamic Wage Accumulator Formula</h2>
+    <div class="formula-box">
+      <strong>Wage Accumulation Engine:</strong><br>
+      $$\text{Total Wages Due} = \left(\sum \text{Days marked } [P]\right) \times \text{Agreed Daily Wage Rate } (₹)$$
+      <em>Example: Ramesh Mistri (Mason) &rarr; 6 Days Present @ ₹600/day = ₹3,600 Total Due.</em>
+    </div>
+  </div>
+
+  <div class="avoid-break">
+    <h2>3. The Interactive Day-Pill Attendance Matrix (UI Demonstration)</h2>
+    <p>Each hired worker record features an interactive multi-day attendance strip. Clicking any pill toggles between Present <code>[P]</code> and Absent <code>[A]</code> in real-time:</p>
+
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div>
+          <strong style="font-size:13px; color:#0f172a;">Ramesh Mistri (राजमिस्त्री / Mason)</strong>
+          <span style="font-size:11px; color:#64748b; margin-left:8px;">Project: Boundary Wall & Verandah Construction</span>
+        </div>
+        <span class="tag tag-green">Rate: ₹600 / day</span>
+      </div>
+
+      <div class="day-pill-demo">
+        <div class="day-pill present">
+          <span class="day-pill-date">25 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+        <div class="day-pill present">
+          <span class="day-pill-date">26 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+        <div class="day-pill present">
+          <span class="day-pill-date">27 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+        <div class="day-pill absent">
+          <span class="day-pill-date">28 Oct</span>
+          <span class="day-pill-status">A</span>
+        </div>
+        <div class="day-pill present">
+          <span class="day-pill-date">29 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+        <div class="day-pill present">
+          <span class="day-pill-date">30 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+        <div class="day-pill present">
+          <span class="day-pill-date">31 Oct</span>
+          <span class="day-pill-status">P</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding-top:6px; border-top:1px dashed #cbd5e1;">
+        <div><strong>Summary:</strong> 6 Days Present, 1 Day Absent</div>
+        <div><strong style="color:#16a34a; font-size:12px;">Total Payable: ₹3,600</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- PART 3: WORKER'S SIDE VIEW & DISPUTE RESOLUTION -->
+  <div class="avoid-break">
+    <h1>Part 3: Worker Perspective & Direct WhatsApp Audit Slips</h1>
+
+    <h2>1. Transparent Worker Dashboard</h2>
+    <p>When a worker logs into GaonKaam with the <strong>Worker</strong> role, their profile shifts from recruitment discovery to personal livelihood tracking:</p>
+    <ul>
+      <li><strong>Active Engagements:</strong> Displays which village employer currently holds their active contract.</li>
+      <li><strong>Personal Daily Log:</strong> Shows the exact attendance pills marked by the work owner.</li>
+      <li><strong>Earnings Counter:</strong> Live calculation of their wages to date, eliminating arbitrary wage deductions at project completion.</li>
+    </ul>
+
+    <h2>2. WhatsApp Attendance Slip Generator (<code>sendWhatsAppAttendanceSlip</code>)</h2>
+    <p>A single click generates an itemized settlement slip sent directly through the WhatsApp Business API or direct web URL schema:</p>
+    
+    <div class="code-box">
+========================================
+🌾 GAONKAAM WORK & ATTENDANCE STATEMENT
+========================================
+Employer: Suresh Patel (Sundarpur)
+Worker: Ramesh Mistri (+91 98765 43210)
+Trade: राजमिस्त्री (Mason)
+Project: Boundary Wall Construction
+
+ATTENDANCE LOG:
+  ✓ 25 Oct: PRESENT (उपस्थित)
+  ✓ 26 Oct: PRESENT (उपस्थित)
+  ✓ 27 Oct: PRESENT (उपस्थित)
+  ✗ 28 Oct: ABSENT  (अनुपस्थित)
+  ✓ 29 Oct: PRESENT (उपस्थित)
+  ✓ 30 Oct: PRESENT (उपस्थित)
+  ✓ 31 Oct: PRESENT (उपस्थित)
+
+TOTAL SUMMARY:
+  Total Days Contracted: 7 Days
+  Total Days Present:    6 Days
+  Agreed Daily Wage:     ₹600 / day
+  ------------------------------------
+  TOTAL NET DUE:         ₹3,600
+========================================
+Generated via GaonKaam Rural Operating System
+    </div>
+  </div>
+
+  <!-- PART 4: CODE ARCHITECTURE MAP -->
+  <div class="avoid-break">
+    <h1>Part 4: Source Code Architecture & Implementation Reference</h1>
+    <p>Complete cross-reference of the production codebase implementing this system:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Module / Feature Component</th>
+          <th>File Location</th>
+          <th>Key Functions & Selectors</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>MGNREGA Data Schemas</strong></td>
+          <td><code>data.js</code></td>
+          <td><code>GAON_DATA.mnregaProjects</code><br><code>GAON_DATA.mnregaWorkers</code></td>
+          <td>Database of village government schemes, sanctioned budgets, wages, job cards, and DBT links.</td>
+        </tr>
+        <tr>
+          <td><strong>MGNREGA Portal Engine</strong></td>
+          <td><code>app.js</code></td>
+          <td><code>renderMnregaPortal()</code><br><code>renderAttendanceViewHTML()</code></td>
+          <td>Village filtering, live wage accumulator, and muster roll table rendering.</td>
+        </tr>
+        <tr>
+          <td><strong>NMMS Verification & Controls</strong></td>
+          <td><code>app.js</code></td>
+          <td><code>toggleMnregaWorkerAttendance()</code><br><code>markAllMnregaPresent()</code></td>
+          <td>Direct interactive event listeners for worker attendance toggles and digital submission.</td>
+        </tr>
+        <tr>
+          <td><strong>Hire Worker Workflow</strong></td>
+          <td><code>app.js</code></td>
+          <td><code>handleConfirmHireSubmit()</code><br><code>openHireModal()</code></td>
+          <td>Captures wage rate, site landmark, and stores worker into employer's <code>AppState.hiredWorkers</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Interactive Day-Pills Matrix</strong></td>
+          <td><code>app.js</code></td>
+          <td><code>renderHiredWorkersAttendanceSection()</code><br><code>toggleHiredWorkerDayAttendance()</code></td>
+          <td>Renders calendar pills, flips [P]/[A] states, and recalculates earnings dynamically.</td>
+        </tr>
+        <tr>
+          <td><strong>WhatsApp Slip Dispatcher</strong></td>
+          <td><code>app.js</code></td>
+          <td><code>sendWhatsAppAttendanceSlip()</code></td>
+          <td>Compiles structured audit statement and constructs WhatsApp <code>https://api.whatsapp.com/send</code> deep link.</td>
+        </tr>
+        <tr>
+          <td><strong>UI Shell & Modals</strong></td>
+          <td><code>index.html</code></td>
+          <td><code>#screenMnrega</code><br><code>#hireScreenHiredBanner</code><br><code>#modalHireConfirm</code></td>
+          <td>Responsive HTML templates for government portals, hired worker management, and confirmation dialogs.</td>
+        </tr>
+        <tr>
+          <td><strong>Design Tokens & Pill Styling</strong></td>
+          <td><code>styles.css</code></td>
+          <td><code>.calendar-day-pill</code><br><code>.status-p</code>, <code>.status-a</code><br><code>.attendance-kpi-grid</code></td>
+          <td>Mobile-first responsive styling for calendar pills, badge indicators, and high-visibility cards.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div>GaonKaam Platform Documentation &bull; Confidential &bull; Designed for Rural Digital Governance</div>
+    <div>Page 3 of 3 &bull; Generated via Headless Chromium / Edge Engine</div>
+  </div>
+
+</body>
+</html>

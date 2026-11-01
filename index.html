@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GaonKaam - Village Employment & Local Bazaar</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'><rect width='24' height='24' rx='6' fill='%23175235'/><path d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' stroke='%23ffffff' stroke-width='2'/></svg>">
+</head>
+<body>
+
+  <!-- Outer Responsive Wrapper -->
+  <div class="app-container-wrapper" id="appContainerWrapper">
+    
+    <!-- Top Mockup Controller Bar -->
+    <div class="top-device-bar">
+      <span>🟢 GaonKaam Rural Portal · Version 2.2</span>
+      <button class="device-toggle-btn" id="deviceToggleBtn" onclick="toggleDeviceView()">
+        🖥️ Switch to Wide View
+      </button>
+    </div>
+
+    <!-- Phone Canvas Shell -->
+    <div class="phone-canvas">
+      
+      <!-- Scrollable Inner Viewport -->
+      <div class="app-viewport" id="appViewport">
+
+        <!-- ================================================================
+             SCREEN 1: FIRST INTERFACE - LOCATION ACCESS (PINCODE / DISTRICT / BLOCK)
+             ================================================================ -->
+        <div id="screenLocationGate" class="location-gate-card">
+          <div class="gate-badge-header">
+            <div class="gate-logo-icon">🏡</div>
+            <h1>GaonKaam · गाँवकाम</h1>
+            <p>Work, workers and goods — in your village and beyond. Enter your area to continue.</p>
+          </div>
+
+          <!-- Method 1: Pincode -->
+          <div class="entry-box-pincode">
+            <label class="form-label" style="display:flex; justify-content:space-between;">
+              <span>6-Digit Area Pincode / पिनकोड</span>
+              <span style="font-weight:normal; color:#64748b; font-size:11px;">Instant Auto-Lookup</span>
+            </label>
+            <div class="pincode-input-row">
+              <input type="number" id="pincodeInput" class="pincode-input-field" placeholder="e.g. 231216" maxlength="6">
+              <button class="btn-verify-pin" onclick="handlePincodeLookup(document.getElementById('pincodeInput').value.trim())">Check</button>
+            </div>
+            <div id="pincodeFeedback" style="font-size:12px; margin-top:6px; min-height:16px;"></div>
+          </div>
+
+          <div class="divider-with-text">OR CHOOSE DISTRICT &amp; BLOCK / ज़िला और ब्लॉक</div>
+
+          <!-- Method 2: State -> District -> Block -> Village Dropdowns -->
+          <form id="locationSelectForm" class="dropdown-fields-box" onsubmit="submitLocationForm(event)">
+            <div class="form-field-group">
+              <label class="form-label">State / राज्य</label>
+              <select id="stateSelect" class="select-custom-field">
+                <option value="">-- Select State --</option>
+              </select>
+            </div>
+
+            <div class="form-row-two-col">
+              <div class="form-field-group">
+                <label class="form-label">District / ज़िला</label>
+                <select id="districtSelect" class="select-custom-field" disabled>
+                  <option value="">-- Select District --</option>
+                </select>
+              </div>
+
+              <div class="form-field-group">
+                <label class="form-label">Block / ब्लॉक</label>
+                <select id="blockSelect" class="select-custom-field" disabled>
+                  <option value="">-- Select Block --</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field-group">
+              <label class="form-label">Village / गाँव या कस्बा</label>
+              <select id="villageSelect" class="select-custom-field" disabled>
+                <option value="">-- Select Village --</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn-publish-listing" style="margin-top:4px;">
+              Enter Village Portal · गाँव में प्रवेश करें ›
+            </button>
+          </form>
+
+          <!-- Detect GPS button -->
+          <button type="button" class="btn-profile-secondary" onclick="autoDetectLocation()">
+            📍 Detect My Village Automatically
+          </button>
+
+          <!-- Quick Demo Villages Chips -->
+          <div>
+            <span style="font-size:12px; font-weight:700; color:#475569;">Try Demo Villages:</span>
+            <div class="quick-demo-villages">
+              <button type="button" class="demo-chip" onclick="selectDemoVillage('231216', 'Sundarpur')">🌾 Sundarpur (Sonbhadra - 231216)</button>
+              <button type="button" class="demo-chip" onclick="selectDemoVillage('231217', 'Kheda')">🏡 Kheda (Sonbhadra - 231217)</button>
+              <button type="button" class="demo-chip" onclick="selectDemoVillage('801108', 'Maner')">🚜 Maner (Patna - 801108)</button>
+              <button type="button" class="demo-chip" onclick="selectDemoVillage('303007', 'Bagru')">🪵 Bagru (Jaipur - 303007)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 2: SECOND INTERFACE - MAIN HUB / WHAT DO YOU WANT TO DO? (PAGE 1)
+             ================================================================ -->
+        <div id="screenHomeHub" class="hidden">
+          <!-- Green Header matching Page 1 + User Logout Bar -->
+          <div class="header-green role-portal-mode">
+            <div class="header-top-row">
+              <div class="logo-group" onclick="navigateTo('home_hub')">
+                <div class="logo-badge">⌂</div>
+                <div class="logo-text">GaonKaam</div>
+              </div>
+
+              <!-- Location Pill matching Screenshot -->
+              <div class="header-loc-pill" onclick="navigateTo('location_gate')">
+                <span class="loc-pin-icon">📍</span>
+                <span id="currentLocTextTop">Sundarpur · PIN 231216</span>
+                <span class="loc-change-text">Change</span>
+              </div>
+
+              <!-- Center/Right Actions -->
+              <div class="header-right-actions">
+                <div class="lang-toggle-pill">
+                  <button type="button" class="lang-btn active" id="btnLangEn" onclick="switchLang('en')">EN</button>
+                  <button type="button" class="lang-btn" id="btnLangHi" onclick="switchLang('hi')">हिंदी</button>
+                </div>
+                <button type="button" class="header-action-btn" onclick="speakCurrentScreen()" title="Listen to Screen">
+                  <span>🔊</span>
+                  <span>Listen</span>
+                </button>
+                <div id="headerUserBadgeContainer"></div>
+              </div>
+            </div>
+
+            <!-- Village Location Pill (Fallback) -->
+            <div class="location-status-bar">
+              <div class="location-info">
+                <span class="loc-pin-icon">📍</span>
+                <span id="currentLocText">Sundarpur village · [Your district]</span>
+              </div>
+              <span class="location-change-link" onclick="navigateTo('location_gate')">Change</span>
+            </div>
+          </div>
+
+          <!-- White Curved Body -->
+          <div class="main-curved-content">
+            <div class="section-hero-title">
+              What do you want to do? <span style="font-weight:normal; font-size:15px; color:#475569;">आप क्या करना चाहते हैं?</span>
+            </div>
+
+            <!-- Dynamic Role Cards Stack -->
+            <div id="homeHubContent"></div>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 3: ALL WORK CATEGORIES (PDF PAGE 2)
+             ================================================================ -->
+        <div id="screenAllWork" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <div class="sub-header-titles">
+                <h2>All work</h2>
+                <p>सभी काम · pick a type of work</p>
+              </div>
+            </div>
+            <div class="lang-toggle-pill">
+              <button type="button" class="lang-btn active" onclick="switchLang('en')">EN</button>
+              <button type="button" class="lang-btn" onclick="switchLang('hi')">हिंदी</button>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="search-container">
+            <div class="search-input-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchWorkInput" placeholder="Search carpenter, mason, driver...">
+            </div>
+          </div>
+
+          <!-- Counter Banner -->
+          <div class="categories-status-banner" id="allWorkCountBanner">
+            12 types of work · 27 workers <span>Tap to see workers</span>
+          </div>
+
+          <!-- 3x4 Categories Grid (Page 2) -->
+          <div class="work-categories-grid" id="categoriesGridContainer"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 4: CATEGORY WORKERS LISTING (PDF PAGE 3)
+             ================================================================ -->
+        <div id="screenCategoryWorkers" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('all_work')">‹</button>
+              <div class="sub-header-titles">
+                <h2 id="categoryWorkersHeaderTitle">Carpenters</h2>
+                <p id="categoryWorkersHeaderSub">बढ़ई · 6 people</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distance Filter Pills (Page 3) -->
+          <div class="pills-filter-row" id="categoryDistancePills">
+            <button class="distance-pill active" data-dist="anywhere" onclick="setDistanceFilter('anywhere')">Anywhere</button>
+            <button class="distance-pill" data-dist="village" onclick="setDistanceFilter('village')">My village</button>
+            <button class="distance-pill" data-dist="10km" onclick="setDistanceFilter('10km')">10 km</button>
+            <button class="distance-pill" data-dist="50km" onclick="setDistanceFilter('50km')">50 km</button>
+          </div>
+
+          <!-- Workers Cards List (Page 3 - Real Photos & Past Sites) -->
+          <div class="workers-cards-list" id="categoryWorkersList"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 5: HIRE WORKERS DIRECTORY & JOB BOARD (PDF PAGE 4)
+             ================================================================ -->
+        <div id="screenHireWorkers" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <div class="sub-header-titles">
+                <h2>Hire workers</h2>
+                <p>कारीगर बुलाएं · verified by phone</p>
+              </div>
+            </div>
+            <button class="cart-header-btn" title="Post Job" onclick="openPostJobModal()">
+              <span style="font-size:20px;">➕</span>
+            </button>
+          </div>
+
+          <!-- Work Owner's Hired Team & Attendance Shortcut Banner (User Request) -->
+          <div class="hired-team-banner-card" id="hireScreenHiredBanner" onclick="navigateTo('profile_creator')">
+            <div class="hired-banner-left">
+              <span style="font-size:22px;">📋</span>
+              <div>
+                <strong id="hiredBannerTitle">My Hired Workers &amp; Daily Attendance Register</strong>
+                <p id="hiredBannerSub">Track present/absent days and total wages due</p>
+              </div>
+            </div>
+            <span class="hired-banner-badge" id="hiredBannerCountBadge">2 Active</span>
+          </div>
+
+          <!-- Category Filter Bar (Page 4) -->
+          <div class="category-pill-bar" id="hireCategoryPills"></div>
+
+          <!-- Yellow "Post a job instead" CTA Card (Page 4) -->
+          <div class="post-job-cta-card" onclick="openPostJobModal()">
+            <div class="post-job-left">
+              <div class="plus-gold-circle">+</div>
+              <div>
+                <div class="post-job-title">Post a job instead</div>
+                <div class="post-job-sub">Workers nearby will call you</div>
+              </div>
+            </div>
+            <div class="arrow-right">›</div>
+          </div>
+
+          <!-- Subheading -->
+          <div class="near-you-header">
+            <span id="hireNearCountText">5 workers near you</span>
+            <span class="distance-subtext">Within 25 km</span>
+          </div>
+
+          <!-- Workers List (Page 4) -->
+          <div class="workers-cards-list" id="hireWorkersListContainer"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 6: GAON BAZAAR (PDF PAGE 5)
+             ================================================================ -->
+        <div id="screenBazaar" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <div class="sub-header-titles">
+                <h2>Gaon Bazaar</h2>
+                <p>गाँव का बाज़ार · buy from local dealers</p>
+              </div>
+            </div>
+            <button class="cart-header-btn" onclick="openCartModal()">
+              🛒
+              <div class="cart-counter-badge" id="bazaarCartBadge">2</div>
+            </button>
+          </div>
+
+          <!-- Search Bar (Page 5) -->
+          <div class="search-container">
+            <div class="search-input-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchBazaarInput" placeholder="Seeds, fertiliser, tools, milk...">
+            </div>
+          </div>
+
+          <!-- Filter Pills (Page 5) -->
+          <div class="bazaar-filter-pills" id="bazaarFilterPills">
+            <button class="bazaar-pill active" data-filter="in_village" onclick="setBazaarFilter('in_village')">In my village</button>
+            <button class="bazaar-pill" data-filter="nearby" onclick="setBazaarFilter('nearby')">Nearby villages</button>
+            <button class="bazaar-pill" data-filter="outside" onclick="setBazaarFilter('outside')">Outside · delivery</button>
+          </div>
+
+          <!-- Meta Row: Sold in [Village] and Categories link -->
+          <div class="bazaar-meta-bar">
+            <div class="bazaar-section-title" id="bazaarSoldInTitle">Sold in Sundarpur</div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <a class="bazaar-categories-link" style="color:#0284c7; font-weight:700;" onclick="navigateTo('shop_orders')">📦 Shop Orders</a>
+              <a class="bazaar-categories-link" onclick="navigateTo('profile_creator')">+ Manage Shop</a>
+            </div>
+          </div>
+
+          <!-- 2-Column Product Grid (Page 5 - Real Photos) -->
+          <div class="bazaar-products-grid" id="bazaarProductsGrid"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 7: SELL A PRODUCT / STORE MANAGER INTERFACE (PDF PAGE 6)
+             ================================================================ -->
+        <div id="screenSellProduct" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('bazaar')">‹</button>
+              <div class="sub-header-titles">
+                <h2>Sell a product</h2>
+                <p id="sellProductShopSub">सामान बेचें · Sharma Beej Bhandar</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form matching Page 6 with Real Photo Upload -->
+          <form class="form-screen-container" onsubmit="handlePublishListing(event)">
+            
+            <!-- Quick Link to Shop Orders Dashboard -->
+            <div style="background:#e0f2fe; border:1px solid #bae6fd; border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="navigateTo('shop_orders')">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">📦</span>
+                <div>
+                  <strong style="font-size:13px; color:#0369a1;">Manage Customer Orders (ऑर्डर देखें)</strong>
+                  <p style="font-size:11px; color:#0c4a6e;">Check pending and completed orders from village buyers</p>
+                </div>
+              </div>
+              <span style="font-weight:700; color:#0284c7; font-size:14px;">Open ›</span>
+            </div>
+
+            <!-- Real Product Photo Upload Dropzone (Page 6) -->
+            <div class="photo-upload-dropzone" onclick="document.getElementById('sellProdFileInput').click()">
+              <input type="file" id="sellProdFileInput" accept="image/*" style="display:none;" onchange="handleProductPhotoUpload(event)">
+              <span style="font-size:28px;">📷</span>
+              <span class="photo-upload-text" id="sellProdPhotoLabel">Add product photo · फोटो लें</span>
+              <p style="font-size:11px; color:#64748b;">Upload genuine product picture from camera or gallery</p>
+              <img id="sellProdPhotoPreview" src="" class="photo-preview-box" alt="Product Preview">
+            </div>
+
+            <!-- Quick Preset Product Photo Chips -->
+            <div style="background:#f8fafc; border-radius:8px; padding:8px;">
+              <span style="font-size:11px; font-weight:700; color:#475569;">Or pick rural product preset:</span>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+                <button type="button" class="demo-chip" onclick="setPresetProductPhoto('wheatSeedPhoto')">🌾 Wheat Seed</button>
+                <button type="button" class="demo-chip" onclick="setPresetProductPhoto('dapFertilizerPhoto')">🪵 DAP Fertilizer</button>
+                <button type="button" class="demo-chip" onclick="setPresetProductPhoto('buffaloMilkPhoto')">🥛 Buffalo Milk</button>
+                <button type="button" class="demo-chip" onclick="setPresetProductPhoto('steelSicklePhoto')">⛏️ Steel Sickle</button>
+              </div>
+            </div>
+
+            <!-- Product Name (Page 6) -->
+            <div class="form-field-group">
+              <label class="form-label">Product name <span class="req">*</span></label>
+              <input type="text" id="prodNameInput" class="form-input-text" placeholder="e.g. Wheat seed (certified)" value="Wheat seed (certified)" required>
+            </div>
+
+            <!-- Price and Per (Page 6) -->
+            <div class="form-row-two-col">
+              <div class="form-field-group">
+                <label class="form-label">Price (₹) <span class="req">*</span></label>
+                <input type="number" id="prodPriceInput" class="form-input-text" placeholder="1250" value="1250" required>
+              </div>
+              <div class="form-field-group">
+                <label class="form-label">Per <span class="req">*</span></label>
+                <input type="text" id="prodUnitInput" class="form-input-text" placeholder="40 kg bag" value="40 kg bag" required>
+              </div>
+            </div>
+
+            <!-- Stock Available (Page 6) -->
+            <div class="form-field-group">
+              <label class="form-label">Stock available</label>
+              <input type="text" id="prodStockInput" class="form-input-text" placeholder="35 bags" value="35 bags">
+            </div>
+
+            <!-- Who Can Buy Radio Group (Page 6) -->
+            <div class="form-field-group">
+              <label class="form-label">Who can buy? · किसे बेचें?</label>
+              <div class="radio-options-card">
+                <label class="radio-option-item">
+                  <input type="radio" name="whoCanBuy" value="village">
+                  <div class="radio-text-col">
+                    <strong>Only my village</strong>
+                    <p>Sundarpur buyers pick up from shop</p>
+                  </div>
+                </label>
+                <label class="radio-option-item">
+                  <input type="radio" name="whoCanBuy" value="nearby" checked>
+                  <div class="radio-text-col">
+                    <strong>Nearby villages</strong>
+                    <p>Up to 25 km around you</p>
+                  </div>
+                </label>
+                <label class="radio-option-item">
+                  <input type="radio" name="whoCanBuy" value="everywhere">
+                  <div class="radio-text-col">
+                    <strong>Everywhere</strong>
+                    <p>Any buyer · you ship or deliver</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- I Can Deliver Switch (Page 6) -->
+            <div class="toggle-switch-row">
+              <span class="toggle-switch-label">I can deliver (होम डिलीवरी)</span>
+              <label class="switch">
+                <input type="checkbox" id="canDeliverSwitch" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Publish Listing Button (Page 6) -->
+            <button type="submit" class="btn-publish-listing">
+              Publish listing · बेचना शुरू करें
+            </button>
+          </form>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 8: DEDICATED PROFILE CREATOR & MANAGER (WITH PHOTOS & WORK SITES & LOGOUT)
+             ================================================================ -->
+        <div id="screenProfileCreator" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <div class="sub-header-titles">
+                <h2>Profile Manager</h2>
+                <p>प्रोफ़ाइल, फोटो व कार्य स्थल विवरण</p>
+              </div>
+            </div>
+            <button type="button" class="btn-header-logout" onclick="handleUserLogout()" title="Log out">
+              <span>🚪</span>
+              <span>${t('logout')}</span>
+            </button>
+          </div>
+
+          <div class="profile-screen-container" id="profileScreenContent"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 9: SHOP OWNER ORDERS MANAGER (User Request)
+             ================================================================ -->
+        <div id="screenShopOrders" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('bazaar')">‹</button>
+              <div class="sub-header-titles">
+                <h2 id="ordersManagerTitle">Shop Orders Manager</h2>
+                <p id="ordersManagerShopSub">दुकानदार ऑर्डर प्रबंधन · Sharma Beej Bhandar</p>
+              </div>
+            </div>
+            <button class="btn-profile-secondary" style="font-size:11px; padding:4px 8px;" onclick="navigateTo('sell_product')">
+              + Add Item
+            </button>
+          </div>
+
+          <!-- Dynamic Shop Orders Content (KPIs, Filters, Order Cards) -->
+          <div class="orders-screen-container" id="shopOrdersScreenContent"></div>
+        </div>
+
+        <!-- ================================================================
+             SCREEN 10: MNREGA GOVT RURAL WORKS & DIGITAL ATTENDANCE (User Request)
+             ================================================================ -->
+        <div id="screenMnrega" class="hidden">
+          <div class="sub-screen-header">
+            <div class="header-left-col">
+              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <div class="sub-header-titles">
+                <h2 id="mnregaHeaderTitle">MGNREGA Rural Works</h2>
+                <p id="mnregaHeaderSub">मनरेगा कार्य, जॉब कार्ड व डिजिटल हाजिरी (NMMS)</p>
+              </div>
+            </div>
+            <button class="btn-profile-secondary" style="font-size:11px; padding:4px 8px;" onclick="openJobCardApplicationModal()">
+              + Job Card
+            </button>
+          </div>
+
+          <!-- Dynamic MNREGA Content (Govt Works, Muster Roll Attendance, Workers) -->
+          <div class="mnrega-screen-container" id="mnregaScreenContent"></div>
+        </div>
+
+      </div> <!-- /app-viewport -->
+
+      <!-- ================================================================
+           BOTTOM NAVIGATION BAR (Work, Hire, Market, Sell, Profile)
+           ================================================================ -->
+      <nav class="bottom-nav-bar hidden" id="bottomNavBar">
+        <button class="nav-item-btn active" id="navBtnWork" onclick="navigateTo('all_work')">
+          <span class="nav-icon">💼</span>
+          <span>Work</span>
+        </button>
+        <button class="nav-item-btn" id="navBtnHire" onclick="navigateTo('hire_workers')">
+          <span class="nav-icon">👥</span>
+          <span>Hire</span>
+        </button>
+        <button class="nav-item-btn" id="navBtnMarket" onclick="navigateTo('bazaar')">
+          <span class="nav-icon">🏪</span>
+          <span>Market</span>
+        </button>
+        <button class="nav-item-btn" id="navBtnSell" onclick="navigateTo('sell_product')">
+          <span class="nav-icon">＋</span>
+          <span>Sell</span>
+        </button>
+        <button class="nav-item-btn" id="navBtnProfile" onclick="navigateTo('profile_creator')">
+          <span class="nav-icon">👤</span>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+    </div> <!-- /phone-canvas -->
+
+  </div> <!-- /app-container-wrapper -->
+
+
+  <!-- ================================================================
+       MODAL: SELECT APP ROLE / INTERFACE (User Request)
+       ================================================================ -->
+  <div class="modal-overlay" id="modalRoleSwitcher">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <div>
+          <h3 id="roleModalTitle">Select Your Interface &amp; Role</h3>
+          <p id="roleModalSub" style="font-size:12px; color:#64748b;">अपनी भूमिका चुनें · ऐप का पूरा इंटरफ़ेस उसी अनुसार बदलेगा</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalRoleSwitcher')">✕</button>
+      </div>
+
+      <div class="modal-body-scroll" style="display:flex; flex-direction:column; gap:12px;">
+        <!-- Option 1: Worker -->
+        <div class="role-modal-choice-card" id="roleChoiceWorker" onclick="selectAppRole('worker')">
+          <div class="role-choice-left">
+            <div class="role-choice-icon-box worker">👷</div>
+            <div class="role-choice-text">
+              <h4>Worker / कामगार (कारीगर)</h4>
+              <p>Find nearby work, view daily attendance, track wages earned, and manage past work experience.</p>
+            </div>
+          </div>
+          <div class="arrow-right">›</div>
+        </div>
+
+        <!-- Option 2: Work Owner -->
+        <div class="role-modal-choice-card" id="roleChoiceHirer" onclick="selectAppRole('hirer')">
+          <div class="role-choice-left">
+            <div class="role-choice-icon-box hirer">👨‍🌾</div>
+            <div class="role-choice-text">
+              <h4>Work Owner / काम देने वाले</h4>
+              <p>Hire local workers, post job requirements, and manage daily attendance register (P/A) with wage calculations.</p>
+            </div>
+          </div>
+          <div class="arrow-right">›</div>
+        </div>
+
+        <!-- Option 3: Shop Owner -->
+        <div class="role-modal-choice-card" id="roleChoiceStore" onclick="selectAppRole('store_manager')">
+          <div class="role-choice-left">
+            <div class="role-choice-icon-box store">🏪</div>
+            <div class="role-choice-text">
+              <h4>Shop Owner / दुकानदार (स्टोर मैनेजर)</h4>
+              <p>Manage customer orders (pending &amp; completed), list seeds &amp; farm goods in Gaon Bazaar, and track sales.</p>
+            </div>
+          </div>
+          <div class="arrow-right">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: HIRE WORKER & ADD TO OWNER PROFILE (User Request)
+       ================================================================ -->
+  <div class="modal-overlay" id="modalHireConfirm">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <div>
+          <h3 id="hireModalHeaderTitle">Hire Worker &amp; Add to Team</h3>
+          <p id="hireModalHeaderSub" style="font-size:12px; color:#64748b;">काम पर रखें एवं दैनिक हाजिरी रजिस्टर शुरू करें</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalHireConfirm')">✕</button>
+      </div>
+
+      <div class="modal-body-scroll">
+        <form onsubmit="handleConfirmHireSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Worker Summary Card -->
+          <div id="hireConfirmWorkerPreview" style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:12px;"></div>
+
+          <input type="hidden" id="hireConfirmWorkerId" value="">
+
+          <div class="form-field-group">
+            <label class="form-label">
+              <span>Task / Project Name (काम का नाम) <span class="req">*</span></span>
+            </label>
+            <input type="text" id="hireConfirmProjectTitle" class="form-input-text" placeholder="e.g. Boundary wall cementing" value="Boundary wall construction" required>
+            
+            <!-- Quick Project Chips -->
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+              <button type="button" class="demo-chip" onclick="setHireProjectPreset('Boundary Wall & Verandah')">🧱 Boundary Wall</button>
+              <button type="button" class="demo-chip" onclick="setHireProjectPreset('Paddy / Wheat Harvesting')">🌾 Field Harvest</button>
+              <button type="button" class="demo-chip" onclick="setHireProjectPreset('House Plaster & Cementing')">🏠 Plaster Work</button>
+              <button type="button" class="demo-chip" onclick="setHireProjectPreset('Tubewell Pipe & Water Line')">🚰 Pipe Line</button>
+            </div>
+          </div>
+
+          <div class="form-row-two-col">
+            <div class="form-field-group">
+              <label class="form-label">Agreed Daily Wage (₹ / day) <span class="req">*</span></label>
+              <input type="number" id="hireConfirmDailyWage" class="form-input-text" value="600" min="100" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Start Date (आरंभ तिथि) <span class="req">*</span></label>
+              <input type="text" id="hireConfirmStartDate" class="form-input-text" value="Today (31 Oct 2026)" required>
+            </div>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Work Owner / Employer Name</label>
+            <input type="text" id="hireConfirmOwnerName" class="form-input-text" value="Chaudhary Virendra Singh (Work Owner)">
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Work Site Landmark in Village</label>
+            <input type="text" id="hireConfirmWorkSite" class="form-input-text" value="East Field Plot, Sundarpur">
+          </div>
+
+          <div style="background:#fefce8; border:1px solid #fef08a; border-radius:8px; padding:10px; font-size:12px; color:#854d0e; display:flex; gap:8px; align-items:flex-start;">
+            <span style="font-size:16px;">💡</span>
+            <div>
+              <strong>Instant Digital Attendance Register:</strong> This worker will be added to your profile immediately. You will be able to mark daily attendance (Present/Absent) and track total wages payable.
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
+            <button type="submit" class="btn-publish-listing">
+              ✓ Confirm Hire &amp; Add to My Profile ›
+            </button>
+            <button type="button" class="btn-profile-secondary" id="hireConfirmCallBtn">
+              📞 Call Worker to Discuss First
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: POST A JOB (HIRER ROLE)
+       ================================================================ -->
+  <div class="modal-overlay" id="modalPostJob">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <div>
+          <h3>Post A Job · काम पोस्ट करें</h3>
+          <p style="font-size:12px; color:#64748b;">Workers nearby will call you</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalPostJob')">✕</button>
+      </div>
+
+      <div class="modal-body-scroll">
+        <form onsubmit="handlePublishJob(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-field-group">
+            <label class="form-label">Job Requirement / काम का नाम <span class="req">*</span></label>
+            <input type="text" id="jobTitleInput" class="form-input-text" placeholder="e.g. Need 4 farm labourers for wheat sowing" required>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Category / कारीगर का प्रकार</label>
+            <select id="jobCatSelect" class="select-custom-field">
+              <option value="farm_labour">Farm Labour (खेत मज़दूर)</option>
+              <option value="mason">Mason (राजमिस्त्री)</option>
+              <option value="carpenter">Carpenter (बढ़ई)</option>
+              <option value="electrician">Electrician (बिजली मिस्त्री)</option>
+              <option value="plumber">Plumber (नल मिस्त्री)</option>
+              <option value="helper">Helper (सहायक मज़दूर)</option>
+            </select>
+          </div>
+
+          <div class="form-row-two-col">
+            <div class="form-field-group">
+              <label class="form-label">Workers Needed</label>
+              <input type="number" id="jobWorkersCount" class="form-input-text" value="3" min="1">
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Wage (₹ / day)</label>
+              <input type="number" id="jobWageInput" class="form-input-text" value="500">
+            </div>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Duration</label>
+            <input type="text" id="jobDurationInput" class="form-input-text" placeholder="e.g. 3 days" value="3 days">
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Notes &amp; Location Landmark</label>
+            <textarea id="jobNotesInput" class="form-input-text" rows="2" placeholder="e.g. Work starts 7 AM at East Field. Lunch provided."></textarea>
+          </div>
+
+          <button type="submit" class="btn-publish-listing">
+            Broadcast Job to Local Workers ›
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: WORKER DETAILS & CV MODAL (WITH WORK SITES)
+       ================================================================ -->
+  <div class="modal-overlay" id="modalWorkerDetails">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <h3>Worker Profile · कारीगर प्रोफ़ाइल</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalWorkerDetails')">✕</button>
+      </div>
+      <div class="modal-body-scroll" id="workerModalContent"></div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: DIRECT CALL & CONNECT DIALOG
+       ================================================================ -->
+  <div class="modal-overlay" id="modalCallConnect">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <h3>Call Worker · संपर्क करें</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalCallConnect')">✕</button>
+      </div>
+      <div class="modal-body-scroll" id="callDialogContent"></div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: VOICE ASSISTANT ("बोलकर बताएं")
+       ================================================================ -->
+  <div class="modal-overlay" id="modalVoiceAssistant">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <h3>बोलकर बताएं · Voice Search</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalVoiceAssistant')">✕</button>
+      </div>
+      <div class="modal-body-scroll" style="text-align:center;">
+        <div class="voice-wave-container">
+          <div class="voice-wave-bar"></div>
+          <div class="voice-wave-bar"></div>
+          <div class="voice-wave-bar"></div>
+          <div class="voice-wave-bar"></div>
+          <div class="voice-wave-bar"></div>
+        </div>
+
+        <div id="voiceStatusText" style="font-size:14px; font-weight:700; color:#15803d; margin-bottom:8px;">
+          Listening... बोलिए...
+        </div>
+
+        <div id="voiceTranscriptResult" style="font-size:16px; font-weight:800; color:#0f172a; min-height:28px;">
+          ...
+        </div>
+
+        <p style="font-size:12px; color:#64748b; margin-top:8px;">
+          Or tap a quick rural voice search shortcut:
+        </p>
+
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px;">
+          <button type="button" class="demo-chip" onclick="triggerVoiceSuggestion('बढ़ई चाहिए')">🪚 बढ़ई चाहिए (Carpenter)</button>
+          <button type="button" class="demo-chip" onclick="triggerVoiceSuggestion('राजमिस्त्री')">🧱 राजमिस्त्री (Mason)</button>
+          <button type="button" class="demo-chip" onclick="triggerVoiceSuggestion('गेहूं का बीज')">🌾 गेहूं का बीज (Wheat Seed)</button>
+          <button type="button" class="demo-chip" onclick="triggerVoiceSuggestion('खेत मज़दूर')">👨‍🌾 खेत मज़दूर (Farm labour)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: SHOPPING CART & CHECKOUT MODAL
+       ================================================================ -->
+  <div class="modal-overlay" id="modalCart">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <div>
+          <h3>Village Shopping Cart · झोला</h3>
+          <p style="font-size:12px; color:#64748b;">Direct from local village shops</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalCart')">✕</button>
+      </div>
+
+      <div class="modal-body-scroll">
+        <div id="cartItemsList"></div>
+
+        <div style="margin-top:14px; padding-top:10px; border-top:1.5px dashed #cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:15px; font-weight:700; color:#0f172a;">Total Amount / कुल:</span>
+          <span id="cartTotalAmount" style="font-size:18px; font-weight:800; color:#15803d;">₹0</span>
+        </div>
+
+        <!-- Customer Order Details for Shopkeeper -->
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+          <strong style="font-size:12.5px; color:#0f172a;">Customer Details for Local Store:</strong>
+          <input type="text" id="cartCustomerName" class="form-input-text" placeholder="Your Name / आपका नाम (e.g. Ram Singh)" value="Chaudhary Virendra Singh">
+          <input type="tel" id="cartCustomerPhone" class="form-input-text" placeholder="Mobile Number / फ़ोन नंबर" value="+91 98210 55443">
+          
+          <div class="form-row-two-col">
+            <select id="cartDeliveryType" class="select-custom-field">
+              <option value="pickup">🏬 Pickup from Shop (दुकान से)</option>
+              <option value="delivery">🏠 Home Delivery (घर पर)</option>
+            </select>
+            <input type="text" id="cartCustomerLandmark" class="form-input-text" placeholder="Landmark (Near East Field)" value="Near East Field">
+          </div>
+        </div>
+
+        <button type="button" class="btn-publish-listing" onclick="handleCheckout(event)" style="margin-top:12px;">
+          Confirm Order &amp; Send to Shopkeeper ›
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: PHONE LOGIN MODAL
+       ================================================================ -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal-dialog-box">
+      <div class="modal-header-row">
+        <h3>🔑 Log in with phone · फ़ोन से लॉगिन</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalLogin')">✕</button>
+      </div>
+      <div class="modal-body-scroll">
+        <form onsubmit="handleLoginSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-field-group">
+            <label class="form-label">10-Digit Mobile Number / मोबाइल नंबर</label>
+            <input type="tel" id="loginPhoneInput" class="form-input-text" placeholder="e.g. 9807700770" maxlength="10" required>
+          </div>
+          <p style="font-size:12px; color:#64748b; margin:0;">Enter the mobile number used when creating your profile.</p>
+          <button type="submit" class="btn-publish-listing">Send OTP &amp; Log In ›</button>
+        </form>
+
+        <!-- Quick 1-Click Demo Profiles -->
+        <div class="login-modal-demo-box">
+          <div class="login-modal-demo-title">⚡ Quick 1-Click Login (Pre-registered Profiles):</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button type="button" class="demo-login-chip" onclick="quickLoginWithPhone('9807700770')">
+              👷 <strong>nkx k</strong> · Electrician (98077 00770)
+            </button>
+            <button type="button" class="demo-login-chip" onclick="quickLoginWithPhone('9876543210')">
+              👷 <strong>Ramesh Sharma</strong> · Mason (98765 43210)
+            </button>
+            <button type="button" class="demo-login-chip" onclick="quickLoginWithPhone('9821055443')">
+              👨‍🌾 <strong>Chaudhary Virendra Singh</strong> · Work Owner (98210 55443)
+            </button>
+            <button type="button" class="demo-login-chip" onclick="quickLoginWithPhone('9833322110')">
+              🏪 <strong>Sharma Beej Bhandar</strong> · Shop Owner (98333 22110)
+            </button>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top:14px; font-size:12.5px; color:#64748b;">
+          Don't have a profile yet? <a style="color:#16a34a; font-weight:700; cursor:pointer;" onclick="closeModal('modalLogin'); navigateTo('profile_creator');">Create New Profile ›</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       MODAL: ATTENDANCE CORRECTION QUERY / हाजिरी सुधार अनुरोध
+  ================================================================ -->
+  <div class="modal-overlay" id="modalAttendanceQuery">
+    <div class="modal-dialog-box" style="max-width:440px;">
+      <div class="modal-header-row">
+        <div>
+          <h3 style="margin:0; font-size:16px; font-weight:800; color:#f8fafc;">🙋‍♂️ Raise Attendance Correction Query</h3>
+          <p style="margin:2px 0 0 0; font-size:11.5px; color:#94a3b8;">हाजिरी सुधार हेतु काम मालिक / मेट को अनुरोध भेजें</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalAttendanceQuery')">✕</button>
+      </div>
+      <div class="modal-body-scroll">
+        <form onsubmit="handleAttendanceQuerySubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <input type="hidden" id="queryCategory" value="private">
+          
+          <div class="form-field-group">
+            <label class="form-label">Authority / Employer (काम मालिक या पंचायत मेट)</label>
+            <input type="text" id="queryEmployerDisplay" class="form-input-text" value="Chaudhary Virendra Singh" readonly style="background:#0b1510; opacity:0.9;">
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Date of Dispute / किस तारीख की हाजिरी गलत है? *</label>
+            <select id="queryDateSelect" class="form-input-text" required style="background:#0d1912; color:#f8fafc; border:1px solid #1f3d2c;">
+              <option value="28 Oct 2026 (Wednesday)">28 Oct 2026 (Wednesday) - Marked Absent (✕)</option>
+              <option value="27 Oct 2026 (Tuesday)">27 Oct 2026 (Tuesday)</option>
+              <option value="29 Oct 2026 (Thursday)">29 Oct 2026 (Thursday)</option>
+              <option value="30 Oct 2026 (Friday)">30 Oct 2026 (Friday)</option>
+              <option value="31 Oct 2026 (Saturday)">31 Oct 2026 (Saturday)</option>
+              <option value="Other Recent Date">Other / अन्य तारीख</option>
+            </select>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Correction Type / समस्या क्या है? *</label>
+            <select id="queryTypeSelect" class="form-input-text" required style="background:#0d1912; color:#f8fafc; border:1px solid #1f3d2c;">
+              <option value="marked_absent">उपस्थित था लेकिन अनुपस्थित (A) लगा दी गई (Marked Absent, but was Present)</option>
+              <option value="half_day">पूरा दिन काम किया लेकिन आधा दिन लगा (Full day worked, but marked half day)</option>
+              <option value="wage_dispute">तय मजदूरी से कम दर जुड़ी (Daily wage rate dispute)</option>
+              <option value="overtime_missing">अतिरिक्त काम (ओवरटाइम) दर्ज नहीं हुआ (Overtime not logged)</option>
+            </select>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Explanation / कारण व काम का विवरण *</label>
+            <textarea id="queryReasonInput" class="form-input-text" rows="3" placeholder="उदा. 28 तारीख को उत्तरी दीवार की चिनाई का काम पूरा 8 घंटे किया था, कृपया हाजिरी में सुधार करें।" required style="resize:vertical;"></textarea>
+          </div>
+
+          <div style="background:#13251c; border:1px dashed #22c55e; border-radius:8px; padding:10px; font-size:11.5px; color:#86efac; line-height:1.4;">
+            💡 <strong>सूचना:</strong> यह अनुरोध सीधे काम मालिक / मेट के हाजिरी पोर्टल में दिखेगा और वे इसे 1-क्लिक में स्वीकार कर आपकी हाजिरी सुधार सकते हैं।
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:4px;">
+            <button type="button" class="btn-cancel" onclick="closeModal('modalAttendanceQuery')" style="flex:1; padding:10px; background:#1f2937; border:none; border-radius:8px; color:#cbd5e1; cursor:pointer;">
+              रद्द करें (Cancel)
+            </button>
+            <button type="submit" class="btn-hire-primary" style="flex:1.5; padding:10px; background:#16a34a; border:none; border-radius:8px; color:#fff; font-weight:800; cursor:pointer;">
+              अनुरोध भेजें (Submit Query)
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- Dynamic Floating Toast Notification -->
+  <div class="toast-notice" id="toastNotice">Notification</div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
