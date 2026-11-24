@@ -3498,3 +3498,120 @@ input:checked + .slider:before { transform: translateX(22px); }
   background: #22c55e;
   color: #0f172a;
 }
+
+
+/* Location Gate Back Button Styling */
+.location-gate-back-row {
+  display: flex;
+  align-items: center;
+}
+
+.btn-gate-back {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-gate-back:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Dark Theme Overrides for Work Owner Hired Workers & Attendance Register */
+.dark-portal-theme .hired-section-header h3 {
+  color: #f8fafc !important;
+}
+
+.dark-portal-theme .hired-section-header p {
+  color: #94a3b8 !important;
+}
+
+.dark-portal-theme .hired-stats-summary-grid .hired-stat-card {
+  background: #13251c !important;
+  border: 1px solid #1f3d2c !important;
+}
+
+.dark-portal-theme .hired-stat-card .hired-stat-label {
+  color: #94a3b8 !important;
+}
+
+.dark-portal-theme .hired-stat-card .hired-stat-val {
+  color: #f8fafc !important;
+}
+
+.dark-portal-theme .hired-stat-card.present .hired-stat-val {
+  color: #4ade80 !important;
+}
+
+.dark-portal-theme .hired-stat-card.absent .hired-stat-val {
+  color: #f87171 !important;
+}
+
+.dark-portal-theme .hired-stat-card.wages .hired-stat-val {
+  color: #fbbf24 !important;
+}
+
+.dark-portal-theme .hired-worker-card {
+  background: #13251c !important;
+  border: 1.5px solid #1f3d2c !important;
+}
+
+.dark-portal-theme .hired-worker-name-col h4 {
+  color: #f8fafc !important;
+}
+
+.dark-portal-theme .hired-worker-trade-text {
+  color: #94a3b8 !important;
+}
+
+.dark-portal-theme .hired-worker-wage-rate {
+  color: #4ade80 !important;
+}
+
+.dark-portal-theme .hired-worker-wage-sub {
+  color: #94a3b8 !important;
+}
+
+.dark-portal-theme .hired-project-banner {
+  background: #1b3d2b !important;
+  border: 1px solid #22c55e !important;
+  color: #f8fafc !important;
+}
+
+.dark-portal-theme .attendance-calendar-box {
+  background: #0d1912 !important;
+  border: 1px solid #1f3d2c !important;
+}
+
+.dark-portal-theme .attendance-box-header span {
+  color: #cbd5e1 !important;
+}
+
+.dark-portal-theme .btn-attendance-action {
+  background: #13251c !important;
+  border: 1px solid #1f3d2c !important;
+  color: #f8fafc !important;
+}
+
+.dark-portal-theme .btn-attendance-action:hover {
+  background: #1f3d2c !important;
+}
+
+.dark-portal-theme .btn-attendance-action.primary {
+  background: #16a34a !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+.dark-portal-theme .btn-attendance-action.danger {
+  color: #f87171 !important;
+}

@@ -30,6 +30,14 @@
              SCREEN 1: FIRST INTERFACE - LOCATION ACCESS (PINCODE / DISTRICT / BLOCK)
              ================================================================ -->
         <div id="screenLocationGate" class="location-gate-card">
+          <!-- Back button to return to previous page (User Request) -->
+          <div class="location-gate-back-row" id="locationGateBackRow" style="margin-bottom:12px; display:none;">
+            <button type="button" class="btn-gate-back" onclick="goBack()">
+              <span style="font-size:16px; line-height:1;">‹</span>
+              <span id="locationGateBackText">वापस जाएं / Go Back</span>
+            </button>
+          </div>
+
           <div class="gate-badge-header">
             <div class="gate-logo-icon">🏡</div>
             <h1>GaonKaam · गाँवकाम</h1>
@@ -165,7 +173,7 @@
         <div id="screenAllWork" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2>All work</h2>
                 <p>सभी काम · pick a type of work</p>
@@ -200,7 +208,7 @@
         <div id="screenCategoryWorkers" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('all_work')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2 id="categoryWorkersHeaderTitle">Carpenters</h2>
                 <p id="categoryWorkersHeaderSub">बढ़ई · 6 people</p>
@@ -226,7 +234,7 @@
         <div id="screenHireWorkers" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2>Hire workers</h2>
                 <p>कारीगर बुलाएं · verified by phone</p>
@@ -280,7 +288,7 @@
         <div id="screenBazaar" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2>Gaon Bazaar</h2>
                 <p>गाँव का बाज़ार · buy from local dealers</p>
@@ -326,7 +334,7 @@
         <div id="screenSellProduct" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('bazaar')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2>Sell a product</h2>
                 <p id="sellProductShopSub">सामान बेचें · Sharma Beej Bhandar</p>
@@ -443,7 +451,7 @@
         <div id="screenProfileCreator" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2>Profile Manager</h2>
                 <p>प्रोफ़ाइल, फोटो व कार्य स्थल विवरण</p>
@@ -464,7 +472,7 @@
         <div id="screenShopOrders" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('bazaar')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2 id="ordersManagerTitle">Shop Orders Manager</h2>
                 <p id="ordersManagerShopSub">दुकानदार ऑर्डर प्रबंधन · Sharma Beej Bhandar</p>
@@ -485,7 +493,7 @@
         <div id="screenMnrega" class="hidden">
           <div class="sub-screen-header">
             <div class="header-left-col">
-              <button class="back-btn" onclick="navigateTo('home_hub')">‹</button>
+              <button class="back-btn" onclick="goBack()">‹</button>
               <div class="sub-header-titles">
                 <h2 id="mnregaHeaderTitle">MGNREGA Rural Works</h2>
                 <p id="mnregaHeaderSub">मनरेगा कार्य, जॉब कार्ड व डिजिटल हाजिरी (NMMS)</p>
@@ -522,9 +530,9 @@
           <span class="nav-icon">＋</span>
           <span>Sell</span>
         </button>
-        <button class="nav-item-btn" id="navBtnProfile" onclick="navigateTo('profile_creator')">
-          <span class="nav-icon">👤</span>
-          <span>Profile</span>
+        <button class="nav-item-btn" id="navBtnRole" onclick="openRoleSwitcherModal()">
+          <span class="nav-icon">🔄</span>
+          <span>Switch Role</span>
         </button>
       </nav>
 

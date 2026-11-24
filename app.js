@@ -5,6 +5,7 @@
 
 // Application State
 const AppState = {
+  screenHistory: [],
   currentLang: 'en', // 'en' or 'hi'
   currentLocation: null, // { pincode, state, district, block, village }
   activeScreen: 'location_gate', // 'location_gate', 'home_hub', 'all_work', 'category_workers', 'hire_workers', 'bazaar', 'sell_product', 'profile_creator'
@@ -483,6 +484,12 @@ function t(key) {
 // Navigation & Screen Switching
 // ==========================================================================
 function navigateTo(screenId, params = {}) {
+  if (AppState.activeScreen && AppState.activeScreen !== screenId) {
+    if (!AppState.screenHistory) AppState.screenHistory = [];
+    if (AppState.screenHistory[AppState.screenHistory.length - 1] !== AppState.activeScreen) {
+      AppState.screenHistory.push(AppState.activeScreen);
+    }
+  }
   AppState.activeScreen = screenId;
   if (params.category) {
     AppState.selectedCategory = params.category;
@@ -495,6 +502,48 @@ function navigateTo(screenId, params = {}) {
   // Scroll viewport to top
   const viewport = document.getElementById('appViewport');
   if (viewport) viewport.scrollTop = 0;
+}
+
+function goBack() {
+  if (AppState.screenHistory && AppState.screenHistory.length > 0) {
+    const prev = AppState.screenHistory.pop();
+    if (prev === AppState.activeScreen) {
+      AppState.activeScreen = (AppState.currentLocation && AppState.currentLocation.village) ? 'home_hub' : 'location_gate';
+    } else {
+      AppState.activeScreen = prev;
+    }
+  } else {
+    if (AppState.activeScreen === 'category_workers') {
+      AppState.activeScreen = 'all_work';
+    } else if (AppState.activeScreen === 'sell_product' || AppState.activeScreen === 'shop_orders') {
+      AppState.activeScreen = 'bazaar';
+    } else if (AppState.currentLocation && AppState.currentLocation.village) {
+      AppState.activeScreen = 'home_hub';
+    } else {
+      AppState.activeScreen = 'location_gate';
+    }
+  }
+  renderApp();
+  const viewport = document.getElementById('appViewport');
+  if (viewport) viewport.scrollTop = 0;
+}
+
+function renderLocationGateScreen() {
+  const backRow = document.getElementById('locationGateBackRow');
+  const backText = document.getElementById('locationGateBackText');
+  if (backRow) {
+    const hasPrev = (AppState.screenHistory && AppState.screenHistory.length > 0) || (AppState.currentLocation && AppState.currentLocation.village);
+    if (hasPrev) {
+      backRow.style.display = 'flex';
+      const isHi = AppState.currentLang === 'hi';
+      const prevVillage = AppState.currentLocation?.village ? ` (${AppState.currentLocation.village})` : '';
+      if (backText) {
+        backText.textContent = isHi ? `‹ वापस जाएं${prevVillage}` : `‹ Back${prevVillage}`;
+      }
+    } else {
+      backRow.style.display = 'none';
+    }
+  }
 }
 
 // ==========================================================================
@@ -735,6 +784,9 @@ function renderApp() {
 
   // Render specific content for active screen
   switch (AppState.activeScreen) {
+    case 'location_gate':
+      renderLocationGateScreen();
+      break;
     case 'home_hub':
       renderHomeHub();
       break;
@@ -1194,38 +1246,8 @@ function renderHomeHub() {
     roleContentHtml = renderShopOwnerDashboard();
   }
 
-  const roleTitles = {
-    worker: isHi ? 'कारीगर (Worker)' : 'Worker',
-    hirer: isHi ? 'काम मालिक (Work Owner)' : 'Work Owner',
-    store_manager: isHi ? 'दुकानदार (Shop Owner)' : 'Shop Owner'
-  };
-  const currentRoleTitle = roleTitles[role] || 'Worker';
-
-  // Dedicated Bottom Role Switcher Option (User Request: Switch role strictly from bottom option)
-  const bottomRoleSwitcherHtml = `
-    <div class="bottom-role-switch-container">
-      <div class="bottom-role-switch-card" onclick="openRoleSwitcherModal()">
-        <div class="bottom-role-switch-left">
-          <div class="bottom-role-switch-icon">🔄</div>
-          <div>
-            <div class="bottom-role-switch-title">
-              ${isHi ? 'भूमिका बदलें (Switch Role)' : 'Switch Role / Interface'}
-            </div>
-            <div class="bottom-role-switch-subtitle">
-              ${isHi ? 'वर्तमान में सक्रिय: ' + currentRoleTitle + ' · अन्य भूमिका (कारीगर, काम मालिक, दुकानदार) में जाने के लिए टैप करें' : 'Currently active: ' + currentRoleTitle + ' · Tap here to switch to another role'}
-            </div>
-          </div>
-        </div>
-        <button type="button" class="bottom-role-switch-btn" onclick="event.stopPropagation(); openRoleSwitcherModal()">
-          ${isHi ? 'रोल बदलें ›' : 'Change Role ›'}
-        </button>
-      </div>
-    </div>
-  `;
-
   container.innerHTML = `
     ${roleContentHtml}
-    ${bottomRoleSwitcherHtml}
 
     <!-- Speak Instead of Typing Button (Page 1) -->
     <button class="speak-voice-btn" style="margin-top:10px; background:#13251c; border:1.5px solid #1f3d2c; color:#f8fafc;" onclick="openVoiceAssistant()">
@@ -1491,7 +1513,18 @@ function renderWorkerDashboard() {
             <div class="worker-job-card" style="background:#13251c; border:1.5px solid #1f3d2c; border-radius:12px; padding:14px;">
               <div class="worker-job-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                  <div class="worker-job-title" style="font-size:15px; font-weight:800; color:#f8fafc;">${isHi ? (job.titleHi || job.title) : job.title}</div>
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <div class="worker-job-title" style="font-size:15px; font-weight:800; color:#f8fafc;">${isHi ? (job.titleHi || job.title) : job.title}</div>
+                    ${(() => {
+                      const st = job.status || 'available';
+                      if (st === 'completed') {
+                        return `<span style="font-size:10.5px; font-weight:700; color:#93c5fd; background:#172554; border:1px solid #3b82f6; padding:1px 6px; border-radius:4px;">🔵 ${isHi ? 'पूरा हुआ' : 'Completed'}</span>`;
+                      } else if (st === 'in_progress') {
+                        return `<span style="font-size:10.5px; font-weight:700; color:#fde047; background:#451a03; border:1px solid #eab308; padding:1px 6px; border-radius:4px;">🟡 ${isHi ? 'काम जारी' : 'In Progress'}</span>`;
+                      }
+                      return `<span style="font-size:10.5px; font-weight:700; color:#4ade80; background:#14532d; border:1px solid #22c55e; padding:1px 6px; border-radius:4px;">🟢 ${isHi ? 'उपलब्ध' : 'Available'}</span>`;
+                    })()}
+                  </div>
                   <div style="font-size:12px; color:#94a3b8; margin-top:2px;">
                     👤 ${job.hirerName} · 📍 ${job.village}
                   </div>
@@ -1925,37 +1958,121 @@ function renderHirerDashboard() {
       </div>
     `;
   } else if (activeTab === 'jobs') {
-    // My Jobs & Post a Job
+    // My Jobs & Post a Job (Work Site Management: Status Available/In Progress/Completed & Delete)
+    const myJobs = AppState.jobs || [];
     tabContentHtml = `
       <div style="margin-bottom:18px;">
         <div class="post-job-cta-card" style="margin-bottom:16px; background:#1b3d2b; border:1.5px solid #22c55e; border-radius:12px; padding:14px; cursor:pointer;" onclick="openPostJobModal()">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <strong style="font-size:15px; color:#f8fafc;">➕ ${isHi ? 'नया काम पोस्ट करें' : 'Post a New Job Requirement'}</strong>
+              <strong style="font-size:15px; color:#f8fafc;">➕ ${isHi ? 'नया काम / कार्य स्थल पोस्ट करें' : 'Post New Job / Work Site'}</strong>
               <p style="font-size:12px; color:#86efac; margin:3px 0 0 0;">${isHi ? 'खेत मजदूर, राजमिस्त्री या बढ़ई चाहिए? आस-पास के कारीगर सीधे संपर्क करेंगे।' : 'Need farm labourers, masons, carpenters? Local workers will call you.'}</p>
             </div>
             <span style="font-size:22px; color:#4ade80;">›</span>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h3 style="font-size:16px; font-weight:800; color:#f8fafc; margin:0;">📋 ${isHi ? 'मेरे सक्रिय काम पोस्ट' : 'My Active Job Posts'}</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:16px; font-weight:800; color:#f8fafc; margin:0;">📋 ${isHi ? 'मेरे कार्य स्थल व काम पोस्ट' : 'My Work Sites & Job Posts'}</h3>
+            <p style="font-size:11.5px; color:#94a3b8; margin:2px 0 0 0;">${isHi ? 'काम की स्थिति बदलें (उपलब्ध / काम जारी / पूरा हुआ) अथवा हटाएं' : 'Update work status (Available / In Progress / Completed) or delete work site'}</p>
+          </div>
           <button class="role-change-btn" style="margin:0;" onclick="openPostJobModal()">+ ${isHi ? 'नया काम' : 'New Job'}</button>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:10px;">
-          ${(AppState.jobs || []).map(j => `
-            <div style="background:#13251c; border:1px solid #1f3d2c; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <strong style="font-size:14px; color:#f8fafc;">${j.title}</strong>
-                <div style="font-size:12px; color:#94a3b8;">₹${j.dailyWage}/day · ${j.workersCount} workers · ${j.duration}</div>
-              </div>
-              <span style="font-size:11px; font-weight:700; color:#4ade80; background:#1b3d2b; padding:3px 8px; border-radius:6px; border:1px solid #22c55e;">
-                ✓ Active
-              </span>
-            </div>
-          `).join('')}
-        </div>
+        ${myJobs.length === 0 ? `
+          <div style="background:#13251c; border:1.5px dashed #1f3d2c; border-radius:12px; padding:28px 16px; text-align:center;">
+            <div style="font-size:32px; margin-bottom:6px;">📋</div>
+            <h4 style="font-size:15px; font-weight:800; color:#f8fafc; margin:0;">${isHi ? 'वर्तमान में कोई काम पोस्ट नहीं है' : 'No Active Work Sites Posted'}</h4>
+            <p style="font-size:12px; color:#94a3b8; margin:6px auto 14px auto; max-width:320px;">
+              ${isHi ? 'नया काम पोस्ट करें ताकि गाँव के कारीगर आपसे संपर्क कर सकें।' : 'Post a work site or job requirement to receive calls from local workers.'}
+            </p>
+            <button class="btn-publish-listing" style="width:auto; margin:0 auto; padding:8px 16px;" onclick="openPostJobModal()">
+              + ${isHi ? 'नया काम पोस्ट करें' : 'Post New Work Site'}
+            </button>
+          </div>
+        ` : `
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            ${myJobs.map(j => {
+              const currentStatus = j.status || 'available';
+              const title = isHi ? (j.titleHi || j.title) : j.title;
+              const statusBadges = {
+                available: { text: isHi ? '🟢 खुला है (Available)' : '🟢 Available', bg: '#14532d', color: '#4ade80', border: '#22c55e' },
+                in_progress: { text: isHi ? '🟡 काम जारी है (In Progress)' : '🟡 In Progress', bg: '#451a03', color: '#fde047', border: '#eab308' },
+                completed: { text: isHi ? '🔵 पूरा हुआ (Completed)' : '🔵 Completed', bg: '#172554', color: '#93c5fd', border: '#3b82f6' }
+              };
+              const badge = statusBadges[currentStatus] || statusBadges.available;
+
+              return `
+                <div style="background:#13251c; border:1.5px solid #1f3d2c; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+                  <!-- Top Row: Title, Wage, Status Badge -->
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                    <div>
+                      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <strong style="font-size:15px; font-weight:800; color:#f8fafc;">${title}</strong>
+                        <span style="font-size:11px; font-weight:700; color:${badge.color}; background:${badge.bg}; border:1px solid ${badge.border}; padding:2px 8px; border-radius:6px;">
+                          ${badge.text}
+                        </span>
+                      </div>
+                      <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
+                        📍 ${j.village || 'Sundarpur'} · ⏳ ${j.duration || 'Short term'} · 👥 ${j.workersCount || 1} ${isHi ? 'मजदूर' : 'workers'}
+                      </div>
+                      ${j.notes ? `<div style="font-size:11.5px; color:#94a3b8; background:#0d1912; border-radius:6px; padding:6px 10px; margin-top:6px; border-left:3px solid #22c55e;">📝 ${j.notes}</div>` : ''}
+                    </div>
+                    <div style="text-align:right; white-space:nowrap;">
+                      <div style="font-size:16px; font-weight:800; color:#4ade80;">₹${j.dailyWage}</div>
+                      <div style="font-size:10.5px; color:#94a3b8;">${isHi ? 'प्रति दिन' : 'per day'}</div>
+                    </div>
+                  </div>
+
+                  <!-- Status Selector & Action Row -->
+                  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #1f3d2c; padding-top:10px; margin-top:2px; flex-wrap:wrap; gap:8px;">
+                    <!-- Status Switch Buttons -->
+                    <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                      <span style="font-size:11px; color:#94a3b8; font-weight:700; margin-right:4px;">
+                        ${isHi ? 'स्थिति:' : 'Status:'}
+                      </span>
+                      <button type="button" 
+                              class="role-status-pill ${currentStatus === 'available' ? 'active' : ''}" 
+                              style="font-size:11px; padding:4px 9px;" 
+                              onclick="updateJobStatus('${j.id}', 'available')"
+                              title="${isHi ? 'उपलब्ध (खुला है)' : 'Mark Available'}">
+                        <span class="role-status-dot"></span>
+                        <span>${isHi ? 'खुला है' : 'Available'}</span>
+                      </button>
+                      <button type="button" 
+                              class="role-status-pill ${currentStatus === 'in_progress' ? 'active in_progress' : ''}" 
+                              style="font-size:11px; padding:4px 9px;" 
+                              onclick="updateJobStatus('${j.id}', 'in_progress')"
+                              title="${isHi ? 'काम जारी है' : 'Mark In Progress'}">
+                        <span class="role-status-dot"></span>
+                        <span>${isHi ? 'काम जारी' : 'In Progress'}</span>
+                      </button>
+                      <button type="button" 
+                              class="role-status-pill ${currentStatus === 'completed' ? 'active no_work' : ''}" 
+                              style="font-size:11px; padding:4px 9px; ${currentStatus === 'completed' ? 'background:#172554; border-color:#3b82f6; color:#93c5fd;' : ''}" 
+                              onclick="updateJobStatus('${j.id}', 'completed')"
+                              title="${isHi ? 'काम पूरा हुआ' : 'Mark Completed'}">
+                        <span class="role-status-dot"></span>
+                        <span>${isHi ? 'पूरा हुआ' : 'Completed'}</span>
+                      </button>
+                    </div>
+
+                    <!-- Delete Work Site Button -->
+                    <button type="button" 
+                            class="btn-profile-remove" 
+                            style="font-size:11px; padding:5px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;" 
+                            onclick="deleteJob('${j.id}')"
+                            title="${isHi ? 'कार्य स्थल हटाएं' : 'Delete this job site'}">
+                      <span>🗑️</span>
+                      <span>${isHi ? 'हटाएं' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
       </div>
     `;
   } else if (activeTab === 'nrega') {
@@ -4656,3 +4773,355 @@ function renderJobCardWorkersViewHTML(workers) {
 }
 
 
+
+
+// ==========================================================================
+// WORK OWNER JOB & WORK SITE MANAGEMENT (User Request)
+// ==========================================================================
+function updateJobStatus(jobId, newStatus) {
+  const isHi = AppState.currentLang === 'hi';
+  const job = (AppState.jobs || []).find(j => j.id === jobId);
+  if (!job) return;
+
+  job.status = newStatus;
+  saveJobs();
+
+  const statusNames = {
+    available: isHi ? '🟢 उपलब्ध (खुला है)' : '🟢 Available',
+    in_progress: isHi ? '🟡 काम जारी है' : '🟡 In Progress',
+    completed: isHi ? '🔵 काम पूरा हुआ' : '🔵 Completed'
+  };
+  const statusName = statusNames[newStatus] || newStatus;
+  showToast(isHi ? `कार्य स्थिति अपडेट: ${statusName}` : `Work status updated: ${statusName}`);
+  renderHomeHub();
+}
+
+function deleteJob(jobId) {
+  const isHi = AppState.currentLang === 'hi';
+  const job = (AppState.jobs || []).find(j => j.id === jobId);
+  const jobTitle = job ? (isHi ? (job.titleHi || job.title) : job.title) : '';
+  const confirmText = isHi ? 
+    `क्या आप कार्य स्थल "${jobTitle}" को अपनी सूची से हटाना चाहते हैं?` : 
+    `Are you sure you want to delete the work site "${jobTitle}"?`;
+  
+  if (!confirm(confirmText)) return;
+
+  AppState.jobs = (AppState.jobs || []).filter(j => j.id !== jobId);
+  saveJobs();
+  showToast(isHi ? 'कार्य स्थल हटा दिया गया' : 'Work site deleted successfully');
+  renderHomeHub();
+}
+
+// Helper to refresh either Profile Screen or Hirer Dashboard Attendance
+function updateAttendanceView() {
+  if (AppState.activeScreen === 'profile_creator' || AppState.activeScreen === 'profile') {
+    renderDedicatedProfileScreen();
+  } else {
+    renderHomeHub();
+  }
+}
+
+// ==========================================================================
+// WORK OWNER HIRED WORKERS & DAILY ATTENDANCE REGISTER (User Request)
+// ==========================================================================
+function renderHiredWorkersAttendanceSection() {
+  const isHi = AppState.currentLang === 'hi';
+  const hiredList = AppState.hiredWorkers || [];
+
+  // Calculate Cumulative Metrics
+  let totalPresentDays = 0;
+  let totalAbsentDays = 0;
+  let totalWagesPool = 0;
+
+  hiredList.forEach(hw => {
+    const pCount = (hw.attendance || []).filter(a => a.status === 'P').length;
+    const aCount = (hw.attendance || []).filter(a => a.status === 'A').length;
+    totalPresentDays += pCount;
+    totalAbsentDays += aCount;
+    totalWagesPool += (pCount * (hw.dailyWage || 500));
+  });
+
+  return `
+    <div class="hired-workers-section">
+      <div class="hired-section-header">
+        <div>
+          <h3>👥 ${isHi ? 'मेरे रखे गए मज़दूर एवं दैनिक हाजिरी रजिस्टर' : 'My Hired Workers & Daily Attendance'}</h3>
+          <p>${isHi ? 'काम पर रखे गए मज़दूरों की दैनिक उपस्थिति (P/A) व कुल देय मजदूरी का हिसाब' : 'Daily attendance register, present & absent timeline and wage accumulator'}</p>
+        </div>
+        <button class="btn-profile-secondary" style="font-size:11px; padding:4px 9px;" onclick="navigateTo('hire_workers')">
+          + ${isHi ? 'और मज़दूर बुलाएं' : 'Hire More'}
+        </button>
+      </div>
+
+      <!-- KPI Summary Grid -->
+      <div class="hired-stats-summary-grid">
+        <div class="hired-stat-card">
+          <span class="hired-stat-val">${hiredList.length}</span>
+          <span class="hired-stat-label">${isHi ? 'कुल मज़दूर' : 'Hired Workers'}</span>
+        </div>
+        <div class="hired-stat-card present">
+          <span class="hired-stat-val">✓ ${totalPresentDays}</span>
+          <span class="hired-stat-label">${isHi ? 'कुल उपस्थित दिन' : 'Days Present'}</span>
+        </div>
+        <div class="hired-stat-card absent">
+          <span class="hired-stat-val">✕ ${totalAbsentDays}</span>
+          <span class="hired-stat-label">${isHi ? 'अनुपस्थित दिन' : 'Days Absent'}</span>
+        </div>
+        <div class="hired-stat-card wages">
+          <span class="hired-stat-val">₹${totalWagesPool.toLocaleString('en-IN')}</span>
+          <span class="hired-stat-label">${isHi ? 'कुल देय मजदूरी' : 'Total Wages Due'}</span>
+        </div>
+      </div>
+
+      <!-- Hired Workers List -->
+      ${hiredList.length === 0 ? `
+        <div style="background:#13251c; border:1.5px dashed #1f3d2c; border-radius:12px; padding:30px 16px; text-align:center;">
+          <div style="font-size:36px; margin-bottom:8px;">👥</div>
+          <h4 style="font-size:15px; font-weight:800; color:#f8fafc;">${isHi ? 'वर्तमान में कोई मज़दूर काम पर नहीं है' : 'No Workers on Your Team Yet'}</h4>
+          <p style="font-size:12.5px; color:#94a3b8; max-width:320px; margin:6px auto 14px auto;">
+            ${isHi ? 'गाँव के सत्यापित कारीगरों (राजमिस्त्री, बढ़ई, खेत मज़दूर) को काम पर रखें और उनकी दैनिक हाजिरी (P/A) दर्ज करें।' : 'Hire verified local masons, carpenters, and farm labourers to track their daily presence, absence and wages.'}
+          </p>
+          <button class="btn-publish-listing" style="width:auto; margin:0 auto; padding:8px 18px;" onclick="navigateTo('hire_workers')">
+            ${isHi ? 'कारीगर खोजें व काम पर रखें ›' : 'Browse & Hire Local Workers ›'}
+          </button>
+        </div>
+      ` : `
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          ${hiredList.map(hw => {
+            const attList = hw.attendance || [];
+            const pDays = attList.filter(a => a.status === 'P').length;
+            const aDays = attList.filter(a => a.status === 'A').length;
+            const wageDue = pDays * (hw.dailyWage || 500);
+            const trade = isHi ? (hw.workerTradeHi || hw.workerTradeEn) : (hw.workerTradeEn || hw.workerTradeHi);
+            const project = isHi ? (hw.projectTitleHi || hw.projectTitle) : hw.projectTitle;
+
+            return `
+              <div class="hired-worker-card" id="hiredCard_${hw.hiredId}">
+                <!-- Top Row: Photo, Name, Rate -->
+                <div class="hired-worker-top-row">
+                  <div class="hired-worker-profile-info">
+                    ${getDummyAvatarHTML(hw.workerName, 44, 16, "#1b4332", "#4ade80", "#2d6a4f")}
+                    <div class="hired-worker-name-col">
+                      <h4>${hw.workerName}</h4>
+                      <div class="hired-worker-trade-text">${trade} · 📍 ${hw.village || 'Sundarpur'}</div>
+                      <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">📞 ${hw.workerPhone}</div>
+                    </div>
+                  </div>
+
+                  <div class="hired-worker-wage-badge">
+                    <div class="hired-worker-wage-rate">₹${hw.dailyWage}</div>
+                    <div class="hired-worker-wage-sub">${isHi ? 'प्रति दिन' : 'per day'}</div>
+                  </div>
+                </div>
+
+                <!-- Project Tag -->
+                <div class="hired-project-banner">
+                  <div>
+                    <strong>🏗️ ${project}</strong>
+                    <span style="font-size:11px; color:#94a3b8; margin-left:6px;">(${isHi ? 'शुरू:' : 'Started:'} ${hw.hireDate})</span>
+                  </div>
+                  <span style="font-size:11px; font-weight:700; color:#4ade80; background:#1b3d2b; padding:2px 6px; border-radius:4px; border:1px solid #22c55e;">
+                    ✓ ${isHi ? 'सक्रिय' : 'Active'}
+                  </span>
+                </div>
+
+                <!-- Cumulative Tally -->
+                <div class="attendance-summary-pills-row">
+                  <span class="tally-badge present">✓ ${pDays} ${isHi ? 'दिन उपस्थित (P)' : 'Days Present (P)'}</span>
+                  <span class="tally-badge absent">✕ ${aDays} ${isHi ? 'दिन अनुपस्थित (A)' : 'Days Absent (A)'}</span>
+                  <span class="tally-badge wages">💰 ₹${wageDue.toLocaleString('en-IN')} ${isHi ? 'कुल देय मजदूरी' : 'Payable'}</span>
+                </div>
+
+                <!-- Daily Attendance Calendar Timeline -->
+                <div class="attendance-calendar-box">
+                  <div class="attendance-box-header">
+                    <span>📅 ${isHi ? 'दैनिक हाजिरी टाइमलाइन (टैप करके P/A बदलें):' : 'Daily Attendance Timeline (Tap to toggle P/A):'}</span>
+                    <button type="button" class="btn-profile-secondary" style="font-size:10.5px; padding:3px 8px;" onclick="addAttendanceDay('${hw.hiredId}')">
+                      + ${isHi ? 'तारीख जोड़ें' : 'Add Date'}
+                    </button>
+                  </div>
+
+                  <div class="attendance-days-scroll">
+                    ${attList.map((att, dayIdx) => `
+                      <div class="day-pill ${att.status === 'P' ? 'present' : 'absent'}" 
+                           onclick="toggleHiredWorkerDayAttendance('${hw.hiredId}', ${dayIdx})"
+                           title="${isHi ? 'टैप करें: P और A में बदलें' : 'Tap to toggle between Present and Absent'}">
+                        <span class="day-pill-date">${att.date}</span>
+                        <span class="day-pill-dayname">${att.dayName}</span>
+                        <span class="day-pill-status">${att.status === 'P' ? '✓ P' : '✕ A'}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <div style="font-size:10.5px; color:#94a3b8; font-style:italic;">
+                    ${isHi ? '💡 हरे रंग का मतलब उपस्थित (P), लाल का मतलब अनुपस्थित (A) है। टैप करके बदलें।' : '💡 Green indicates Present (P), Red indicates Absent (A). Click any day to toggle.'}
+                  </div>
+                </div>
+
+                <!-- Actions Row -->
+                <div class="hired-actions-row">
+                  <button type="button" class="btn-attendance-action primary" onclick="setQuickTodayAttendance('${hw.hiredId}', 'P')">
+                    ✓ ${isHi ? 'आज उपस्थित (P)' : 'Today Present'}
+                  </button>
+                  <button type="button" class="btn-attendance-action" style="color:#f87171;" onclick="setQuickTodayAttendance('${hw.hiredId}', 'A')">
+                    ✕ ${isHi ? 'आज अनुपस्थित (A)' : 'Today Absent'}
+                  </button>
+                  <button type="button" class="btn-attendance-action" onclick="openCallDialog('${hw.workerName}', '${hw.workerPhone}', '${trade}')">
+                    📞 ${isHi ? 'फ़ोन' : 'Call'}
+                  </button>
+                  <button type="button" class="btn-attendance-action" onclick="sendWhatsAppAttendanceSlip('${hw.hiredId}')">
+                    💬 ${isHi ? 'हाजिरी पर्ची' : 'Slip'}
+                  </button>
+                  <button type="button" class="btn-attendance-action danger" onclick="removeHiredWorker('${hw.hiredId}')" title="${isHi ? 'काम समाप्त / हटाएं' : 'End Contract'}">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function toggleHiredWorkerDayAttendance(hiredId, dayIndex) {
+  const hw = (AppState.hiredWorkers || []).find(item => item.hiredId === hiredId);
+  if (!hw || !hw.attendance || !hw.attendance[dayIndex]) return;
+
+  const currentStatus = hw.attendance[dayIndex].status;
+  const newStatus = currentStatus === 'P' ? 'A' : 'P';
+  hw.attendance[dayIndex].status = newStatus;
+
+  saveHiredWorkers();
+  updateAttendanceView();
+
+  const isHi = AppState.currentLang === 'hi';
+  const statusMsg = newStatus === 'P' ? 
+    (isHi ? `✓ ${hw.workerName}: ${hw.attendance[dayIndex].date} उपस्थित दर्ज किया` : `✓ ${hw.workerName}: ${hw.attendance[dayIndex].date} marked Present`) :
+    (isHi ? `✕ ${hw.workerName}: ${hw.attendance[dayIndex].date} अनुपस्थित दर्ज किया` : `✕ ${hw.workerName}: ${hw.attendance[dayIndex].date} marked Absent`);
+  showToast(statusMsg);
+}
+
+function setQuickTodayAttendance(hiredId, status) {
+  const hw = (AppState.hiredWorkers || []).find(item => item.hiredId === hiredId);
+  if (!hw) return;
+
+  const todayStr = getTodayShortDate();
+  const dayNameStr = getTodayDayName();
+
+  if (!hw.attendance) hw.attendance = [];
+
+  const existingToday = hw.attendance.find(a => a.date === todayStr);
+  if (existingToday) {
+    existingToday.status = status;
+  } else {
+    hw.attendance.push({
+      date: todayStr,
+      dayName: dayNameStr,
+      status: status
+    });
+  }
+
+  saveHiredWorkers();
+  updateAttendanceView();
+
+  const isHi = AppState.currentLang === 'hi';
+  const statusText = status === 'P' ? (isHi ? 'उपस्थित (P)' : 'Present') : (isHi ? 'अनुपस्थित (A)' : 'Absent');
+  showToast(`${hw.workerName}: ${todayStr} -> ${statusText}`);
+}
+
+function addAttendanceDay(hiredId) {
+  const hw = (AppState.hiredWorkers || []).find(item => item.hiredId === hiredId);
+  if (!hw) return;
+
+  const isHi = AppState.currentLang === 'hi';
+  const defaultNextDate = getNextDateProposal(hw.attendance);
+  const userDate = prompt(isHi ? 'हाजिरी दर्ज करने हेतु तारीख लिखें (उदा. 1 Nov):' : 'Enter date for attendance record (e.g. 1 Nov):', defaultNextDate);
+  if (!userDate) return;
+
+  const dayName = prompt(isHi ? 'दिन का नाम लिखें (Mon, Tue, Wed, Thu, Fri, Sat, Sun):' : 'Enter day abbreviation (Mon, Tue, Wed, Thu, Fri, Sat, Sun):', 'Sun') || 'Day';
+
+  if (!hw.attendance) hw.attendance = [];
+  hw.attendance.push({
+    date: userDate.trim(),
+    dayName: dayName.trim(),
+    status: 'P'
+  });
+
+  saveHiredWorkers();
+  updateAttendanceView();
+  showToast(isHi ? `नई तारीख ${userDate} जोड़ी गई` : `Date ${userDate} added to attendance register`);
+}
+
+function getTodayShortDate() {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  return `${now.getDate()} ${months[now.getMonth()]}`;
+}
+
+function getTodayDayName() {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[new Date().getDay()];
+}
+
+function getNextDateProposal(attendanceList) {
+  if (!attendanceList || attendanceList.length === 0) return getTodayShortDate();
+  const last = attendanceList[attendanceList.length - 1];
+  const parts = (last.date || '').split(' ');
+  const num = parseInt(parts[0], 10);
+  if (!isNaN(num)) {
+    return `${num + 1} ${parts[1] || 'Nov'}`;
+  }
+  return getTodayShortDate();
+}
+
+function sendWhatsAppAttendanceSlip(hiredId) {
+  const hw = (AppState.hiredWorkers || []).find(item => item.hiredId === hiredId);
+  if (!hw) return;
+
+  const isHi = AppState.currentLang === 'hi';
+  const pCount = (hw.attendance || []).filter(a => a.status === 'P').length;
+  const aCount = (hw.attendance || []).filter(a => a.status === 'A').length;
+  const totalWages = pCount * (hw.dailyWage || 500);
+  const trade = isHi ? (hw.workerTradeHi || hw.workerTradeEn) : hw.workerTradeEn;
+
+  const msg = isHi ?
+`*गाँवकाम दैनिक हाजिरी पर्ची (GaonKaam Attendance Slip)*
+━━━━━━━━━━━━━━━━━━━━
+👷 मज़दूर: *${hw.workerName}* (${trade})
+🏗️ काम: ${hw.projectTitle}
+📍 गाँव: ${hw.village || 'Sundarpur'}
+🗓️ दर्ज दिन: ${(hw.attendance || []).length}
+✅ उपस्थित दिन: *${pCount} दिन*
+❌ अनुपस्थित दिन: *${aCount} दिन*
+💵 तय दैनिक दर: ₹${hw.dailyWage} / दिन
+💰 कुल देय मजदूरी: *₹${totalWages}*
+━━━━━━━━━━━━━━━━━━━━
+हस्ताक्षर: काम मालिक (${AppState.activeUserProfile?.name || 'Chaudhary Virendra Singh'})
+गाँवकाम पोर्टल द्वारा सत्यापित` :
+`*GaonKaam Daily Attendance Slip*
+━━━━━━━━━━━━━━━━━━━━
+👷 Worker: *${hw.workerName}* (${trade})
+🏗️ Project: ${hw.projectTitle}
+📍 Village: ${hw.village || 'Sundarpur'}
+🗓️ Days Recorded: ${(hw.attendance || []).length}
+✅ Days Present: *${pCount} days*
+❌ Days Absent: *${aCount} days*
+💵 Daily Wage Rate: ₹${hw.dailyWage} / day
+💰 Total Wages Due: *₹${totalWages}*
+━━━━━━━━━━━━━━━━━━━━
+Verified via GaonKaam Work Owner Register`;
+
+  openWhatsApp(hw.workerPhone, msg);
+}
+
+function removeHiredWorker(hiredId) {
+  const isHi = AppState.currentLang === 'hi';
+  const confirmMsg = isHi ? 'क्या आप इस मज़दूर को अपनी टीम से हटाना चाहते हैं?' : 'Are you sure you want to remove this worker from your team?';
+  if (!confirm(confirmMsg)) return;
+
+  AppState.hiredWorkers = (AppState.hiredWorkers || []).filter(hw => hw.hiredId !== hiredId);
+  saveHiredWorkers();
+  updateAttendanceView();
+  showToast(isHi ? 'मज़दूर को टीम से हटा दिया गया' : 'Worker removed from team');
+}
