@@ -1184,21 +1184,7 @@ function renderHomeHub() {
     mainCurved.classList.add('dark-portal-theme');
   }
 
-  // 3-Button Role Mode Selector Bar
-  const roleTabsHtml = `
-    <div class="role-mode-selector-bar" style="margin-bottom:14px; background:#13251c; border:1px solid #1f3d2c;">
-      <button class="role-tab-btn ${role === 'worker' ? 'active worker' : ''}" style="${role === 'worker' ? 'background:#1b4332; color:#4ade80; border:1px solid #22c55e;' : 'color:#94a3b8;'}" onclick="selectAppRole('worker')">
-        👷 ${isHi ? 'कामगार मोड' : 'Worker'}
-      </button>
-      <button class="role-tab-btn ${role === 'hirer' ? 'active hirer' : ''}" style="${role === 'hirer' ? 'background:#1b4332; color:#4ade80; border:1px solid #22c55e;' : 'color:#94a3b8;'}" onclick="selectAppRole('hirer')">
-        👨‍🌾 ${isHi ? 'काम मालिक' : 'Work Owner'}
-      </button>
-      <button class="role-tab-btn ${role === 'store_manager' ? 'active store_manager' : ''}" style="${role === 'store_manager' ? 'background:#1b4332; color:#4ade80; border:1px solid #22c55e;' : 'color:#94a3b8;'}" onclick="selectAppRole('store_manager')">
-        🏪 ${isHi ? 'दुकानदार' : 'Shop Owner'}
-      </button>
-    </div>
-  `;
-
+  // Only the active role portion is rendered (No other roles visible at the top)
   let roleContentHtml = '';
   if (role === 'worker') {
     roleContentHtml = renderWorkerDashboard();
@@ -1208,18 +1194,47 @@ function renderHomeHub() {
     roleContentHtml = renderShopOwnerDashboard();
   }
 
+  const roleTitles = {
+    worker: isHi ? 'कारीगर (Worker)' : 'Worker',
+    hirer: isHi ? 'काम मालिक (Work Owner)' : 'Work Owner',
+    store_manager: isHi ? 'दुकानदार (Shop Owner)' : 'Shop Owner'
+  };
+  const currentRoleTitle = roleTitles[role] || 'Worker';
+
+  // Dedicated Bottom Role Switcher Option (User Request: Switch role strictly from bottom option)
+  const bottomRoleSwitcherHtml = `
+    <div class="bottom-role-switch-container">
+      <div class="bottom-role-switch-card" onclick="openRoleSwitcherModal()">
+        <div class="bottom-role-switch-left">
+          <div class="bottom-role-switch-icon">🔄</div>
+          <div>
+            <div class="bottom-role-switch-title">
+              ${isHi ? 'भूमिका बदलें (Switch Role)' : 'Switch Role / Interface'}
+            </div>
+            <div class="bottom-role-switch-subtitle">
+              ${isHi ? 'वर्तमान में सक्रिय: ' + currentRoleTitle + ' · अन्य भूमिका (कारीगर, काम मालिक, दुकानदार) में जाने के लिए टैप करें' : 'Currently active: ' + currentRoleTitle + ' · Tap here to switch to another role'}
+            </div>
+          </div>
+        </div>
+        <button type="button" class="bottom-role-switch-btn" onclick="event.stopPropagation(); openRoleSwitcherModal()">
+          ${isHi ? 'रोल बदलें ›' : 'Change Role ›'}
+        </button>
+      </div>
+    </div>
+  `;
+
   container.innerHTML = `
-    ${roleTabsHtml}
     ${roleContentHtml}
+    ${bottomRoleSwitcherHtml}
 
     <!-- Speak Instead of Typing Button (Page 1) -->
-    <button class="speak-voice-btn" style="margin-top:20px; background:#13251c; border:1.5px solid #1f3d2c; color:#f8fafc;" onclick="openVoiceAssistant()">
+    <button class="speak-voice-btn" style="margin-top:10px; background:#13251c; border:1.5px solid #1f3d2c; color:#f8fafc;" onclick="openVoiceAssistant()">
       <span class="mic-icon">🎙️</span>
       <span>${t('speakBtn')}</span>
     </button>
 
     <!-- Already Registered Link (Page 1) -->
-    <div class="login-link-row" style="color:#94a3b8;">
+    <div class="login-link-row" style="color:#94a3b8; margin-top:12px;">
       <span>${AppState.currentLang === 'hi' ? 'पहले से पंजीकृत हैं?' : 'Already registered?'}</span>
       <a style="color:#4ade80; cursor:pointer;" onclick="openLoginModal()">${AppState.currentLang === 'hi' ? 'फ़ोन से लॉग इन करें' : 'Log in with phone'}</a>
     </div>
@@ -1766,10 +1781,6 @@ function renderWorkerDashboard() {
 
   return `
     <div class="role-portal-view">
-      <button type="button" class="role-change-btn" onclick="openRoleSwitcherModal()">
-        ‹ ${isHi ? 'रोल बदलें' : 'Change role'}
-      </button>
-
       <div class="role-view-header">
         <h1 class="role-view-title">${isHi ? 'काम खोजें' : 'Find work'}</h1>
         <p class="role-view-sub">${isHi ? 'फ़ोटो के साथ अपनी कार्य प्रोफ़ाइल बनाएं। आस-पास के ग्राहक आपको सीधे कॉल करेंगे।' : 'Make your work profile with photos. Customers near you call you directly.'}</p>
@@ -2109,10 +2120,6 @@ function renderHirerDashboard() {
 
   return `
     <div class="role-portal-view">
-      <button type="button" class="role-change-btn" onclick="openRoleSwitcherModal()">
-        ‹ ${isHi ? 'रोल बदलें' : 'Change role'}
-      </button>
-
       <div class="role-view-header">
         <h1 class="role-view-title">${isHi ? 'मजदूर बुलाएं व काम कराएं' : 'Hire workers'}</h1>
         <p class="role-view-sub">${isHi ? 'सत्यापित गाँव के कारीगर खोजें, काम की जरूरत पोस्ट करें, और दैनिक हाजिरी ट्रैक करें।' : 'Find verified village artisans, post job requirements, and track daily attendance.'}</p>
@@ -2442,10 +2449,6 @@ function renderShopOwnerDashboard() {
 
   return `
     <div class="role-portal-view">
-      <button type="button" class="role-change-btn" onclick="openRoleSwitcherModal()">
-        ‹ ${isHi ? 'रोल बदलें' : 'Change role'}
-      </button>
-
       <div class="role-view-header">
         <h1 class="role-view-title">${isHi ? 'गाँव की दुकान व ऑर्डर' : 'Village store & orders'}</h1>
         <p class="role-view-sub">${isHi ? 'अपनी दुकान की प्रोफाइल, ग्राहकों के ऑर्डर, इन्वेंटरी और गाँव बाज़ार प्रबंधित करें।' : 'Manage your shop profile, customer orders, product inventory, and village bazaar.'}</p>

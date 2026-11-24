@@ -1081,10 +1081,17 @@ input:checked + .slider:before { transform: translateX(22px); }
    Bottom Navigation Bar (5 Items: Work, Hire, Market, Sell, Profile)
    ========================================================================== */
 .bottom-nav-bar {
-  background: #ffffff; border-top: 1px solid var(--border-light);
-  display: grid; grid-template-columns: repeat(5, 1fr); position: absolute;
-  bottom: 0; left: 0; right: 0; height: 60px; z-index: 50;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.04);
+  background: #0d1912;
+  border-top: 1.5px solid #1f3d2c;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 50;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .nav-item-btn {
@@ -3412,4 +3419,82 @@ input:checked + .slider:before { transform: translateX(22px); }
   font-size: 11px;
   color: #4ade80;
   font-weight: 600;
+}
+
+
+/* ==========================================================================
+   Bottom Role Switcher Option (User Request: Strict role isolation, bottom switch)
+   ========================================================================== */
+.bottom-role-switch-container {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.bottom-role-switch-card {
+  background: #13251c;
+  border: 1.5px solid #1f3d2c;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bottom-role-switch-card:hover {
+  border-color: #22c55e;
+  background: #162c21;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.12);
+}
+
+.bottom-role-switch-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bottom-role-switch-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #1b4332;
+  border: 1.5px solid #22c55e;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.bottom-role-switch-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.bottom-role-switch-subtitle {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.bottom-role-switch-btn {
+  background: #1b4332;
+  border: 1px solid #22c55e;
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.bottom-role-switch-btn:hover {
+  background: #22c55e;
+  color: #0f172a;
 }
